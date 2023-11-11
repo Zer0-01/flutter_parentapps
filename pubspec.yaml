@@ -50,6 +50,7 @@ dependencies:
   flutter_downloader: ^1.11.2
   get: ^4.6.5
   intl: ^0.18.1
+  file_picker: ^6.1.1
 
 
 

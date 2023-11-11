@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:parentapps/attendance/attendancescreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:parentapps/form/folderselectionscreen.dart';
 import 'package:parentapps/login/loginscreen.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../form/fileselectionscreen.dart';
 
 import '../homework/homeworkscreen.dart';
@@ -29,9 +27,6 @@ class MenuScreen extends StatelessWidget {
         FirebaseFirestore.instance.collection("Students");
 
     Query children = studentCollection.where("name", isEqualTo: childrenName);
-
-    final storage = FirebaseStorage.instance;
-    Reference formsFolder = storage.ref("forms");
 
     return StreamBuilder<QuerySnapshot>(
       stream: children.snapshots(),
@@ -113,8 +108,8 @@ class MenuScreen extends StatelessWidget {
                       icons: Icons.fact_check,
                       onpress: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              GetAttendance(studentId: documentId),
+                          builder: (context) => GetAttendance(
+                              studentId: documentId, studentName: name),
                         ));
                       },
                     ),

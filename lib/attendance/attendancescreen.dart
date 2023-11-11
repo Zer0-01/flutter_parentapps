@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
 
 class GetAttendance extends StatelessWidget {
   final String studentId;
+  final String studentName;
 
-  const GetAttendance({super.key, required this.studentId});
+  const GetAttendance({super.key, required this.studentId, required this.studentName});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,7 @@ class GetAttendance extends StatelessWidget {
         .collection('Students')
         .doc(studentId)
         .collection('Attendance');
+
 
     return StreamBuilder<QuerySnapshot>(
       stream:
@@ -109,8 +112,7 @@ class GetAttendance extends StatelessWidget {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            // Handle button click for Catatan
-                            // For example, show a snackbar
+                            _showConfirmationDialog(context);
                           },
                           child: Icon(Icons.create_rounded),
                         ),
@@ -124,37 +126,51 @@ class GetAttendance extends StatelessWidget {
         );
       },
     );
+  }
 
-    // return FutureBuilder<DocumentSnapshot>(
-    //   future: student.doc(studentId).get(),
-    //   builder:
-    //       (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-    //     if (snapshot.hasError) {
-    //       return Text("Something went wrong");
-    //     }
-    //
-    //     if (snapshot.hasData && !snapshot.data!.exists) {
-    //       return Text("Document does not exist");
-    //     }
-    //
-    //     if (snapshot.connectionState == ConnectionState.done) {
-    //       Map<String, dynamic> data =
-    //           snapshot.data!.data() as Map<String, dynamic>;
-    //       return Text("Full Name: ${data['date']} ${data['status']}");
-    //       // return Scaffold(
-    //       //   appBar: AppBar(
-    //       //     title: Text('Attendance'),
-    //       //   ),
-    //       //   body: ListView.builder(
-    //       //     itemBuilder: (context, index) {
-    //       //       final date = data['date'];
-    //       //     },
-    //       //   ),
-    //       // );
-    //     }
-    //
-    //     return Container();
-    //   },
-    // );
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    String kenyataan;
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Catatan'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('ID Pelajar: $studentId'),
+                Text('Nama: $studentName'),
+                SizedBox(height: 10,),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Kenyataan',
+                  ),
+                  onChanged: (value) {
+                    kenyataan = value;
+                  },
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                // Perform the action here
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
+
