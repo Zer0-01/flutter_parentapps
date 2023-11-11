@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "104611038948",
+    "project_id": "teacherparentapps",
+    "storage_bucket": "teacherparentapps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104611038948:android:ba55382d3429294b860ef1",
+        "android_client_info": {
+          "package_name": "com.fypalfian.parentapps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "104611038948-atll7th8rqhlcobqnp9m809h89qa0mcd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHWdIJ3YeBYq42MxbDmVL9Lmi4Kt9NWlc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "104611038948-atll7th8rqhlcobqnp9m809h89qa0mcd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
