@@ -3,20 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 
-class GetAttendance extends StatelessWidget {
+class GetAttendance extends StatefulWidget{
   final String studentId;
   final String studentName;
 
-  const GetAttendance({super.key, required this.studentId, required this.studentName});
+  const GetAttendance(
+      {super.key, required this.studentId, required this.studentName});
+
+  @override
+  _GetAttendanceState createState() => _GetAttendanceState();
+}
+
+class _GetAttendanceState extends State<GetAttendance> {
+
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     CollectionReference attendanceCollection = FirebaseFirestore.instance
         .collection('Students')
-        .doc(studentId)
+        .doc(widget.studentId)
         .collection('Attendance');
-
 
     return StreamBuilder<QuerySnapshot>(
       stream:
@@ -130,6 +137,9 @@ class GetAttendance extends StatelessWidget {
 
   Future<void> _showConfirmationDialog(BuildContext context) async {
     String kenyataan;
+    String? filePath;
+    String studentId = widget.studentId;
+    String studentName = widget.studentName;
 
     return showDialog<void>(
       context: context,
@@ -141,7 +151,9 @@ class GetAttendance extends StatelessWidget {
               children: <Widget>[
                 Text('ID Pelajar: $studentId'),
                 Text('Nama: $studentName'),
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 TextField(
                   decoration: InputDecoration(
                     labelText: 'Kenyataan',
@@ -149,7 +161,30 @@ class GetAttendance extends StatelessWidget {
                   onChanged: (value) {
                     kenyataan = value;
                   },
-                )
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        FilePickerResult? result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf'],
+                        );
+
+                        if (result != null) {
+                          filePath = result.files.first.path!;
+                          setState(() {});
+                        }
+                      },
+                      child: Text('Pick PDF'),
+                    ),
+                    SizedBox(width: 10),
+                    Text(filePath ?? 'No file selected'),
+                  ],
+                ),
               ],
             ),
           ),
@@ -173,4 +208,3 @@ class GetAttendance extends StatelessWidget {
     );
   }
 }
-
