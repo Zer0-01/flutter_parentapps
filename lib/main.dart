@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:parentapps/childrenscreen/childrenscreen.dart';
 import 'package:parentapps/login/loginscreen.dart';
 import 'firebase_options.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 // @pragma('vm:entry-point')
 // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -83,6 +84,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await FlutterDownloader.initialize(
+    debug: true,
+    ignoreSsl: true,
   );
 
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

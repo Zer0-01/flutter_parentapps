@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String fileUrl;
@@ -159,11 +160,23 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 ? PDFViewer(document: document!)
                 : Text('Error loading PDF')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showPermissionBottomSheet();
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              _showPermissionBottomSheet();
+            },
+            child: Icon(Icons.edit),
+          ),
+          SizedBox(width: 16), // Add some space between buttons
+          FloatingActionButton(
+            onPressed: () {
+              // Add the functionality for the second button
+            },
+            child: Icon(Icons.download), // Replace with the desired icon
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
