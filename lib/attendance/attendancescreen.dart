@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 
-class GetAttendance extends StatefulWidget{
+class GetAttendance extends StatefulWidget {
   final String studentId;
   final String studentName;
 
@@ -15,7 +15,7 @@ class GetAttendance extends StatefulWidget{
 }
 
 class _GetAttendanceState extends State<GetAttendance> {
-
+  late String initialKenyataan = '';
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +85,16 @@ class _GetAttendanceState extends State<GetAttendance> {
                   );
                 }
 
-                Map<String, dynamic> data = snapshot.data!.docs[index - 1]
-                    .data() as Map<String, dynamic>;
-                Timestamp date = data['date'] as Timestamp;
-                bool status = data['status'] as bool;
-                String time = data['time'] as String;
+                QueryDocumentSnapshot<Object?> document =
+                    snapshot.data!.docs[index - 1];
+                Timestamp date = document['date'] as Timestamp;
+                bool status = document['status'] as bool;
+                String time = document['time'] as String;
 
                 DateTime toDate = date.toDate();
                 String formattedDate = DateFormat('dd MMM y').format(toDate);
+
+                String attendanceDocId = document.id;
 
                 return ListTile(
                   title: Row(
@@ -119,7 +121,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            _showConfirmationDialog(context);
+                            _showConfirmationDialog(context, attendanceDocId);
                           },
                           child: Icon(Icons.create_rounded),
                         ),
@@ -135,12 +137,13 @@ class _GetAttendanceState extends State<GetAttendance> {
     );
   }
 
-  Future<void> _showConfirmationDialog(BuildContext context) async {
-    String kenyataan;
+  Future<void> _showConfirmationDialog(
+      BuildContext context, String attendanceDocId) async {
+    String kenyataan = "";
     String? filePath;
     String studentId = widget.studentId;
     String studentName = widget.studentName;
-
+    String documentId = attendanceDocId;
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -151,6 +154,7 @@ class _GetAttendanceState extends State<GetAttendance> {
               children: <Widget>[
                 Text('ID Pelajar: $studentId'),
                 Text('Nama: $studentName'),
+                Text('Date: $documentId'),
                 SizedBox(
                   height: 10,
                 ),
@@ -169,7 +173,8 @@ class _GetAttendanceState extends State<GetAttendance> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        FilePickerResult? result = await FilePicker.platform.pickFiles(
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['pdf'],
                         );
@@ -192,7 +197,7 @@ class _GetAttendanceState extends State<GetAttendance> {
             TextButton(
               child: Text('Yes'),
               onPressed: () {
-                // Perform the action here
+                storeKenyataanInFirebase(kenyataan, documentId);
                 Navigator.of(context).pop();
               },
             ),
@@ -207,4 +212,43 @@ class _GetAttendanceState extends State<GetAttendance> {
       },
     );
   }
+
+  Future<void> storeKenyataanInFirebase(
+      String kenyataan, String attendanceDocId) async {
+    CollectionReference attendanceCollection = FirebaseFirestore.instance
+        .collection('Students')
+        .doc(widget.studentId)
+        .collection('Attendance');
+
+    // Assuming you have a specific document ID or a way to identify the document
+    // If not, you might need to modify this logic accordingly
+    DocumentReference docRef = attendanceCollection.doc(attendanceDocId);
+
+    // Get the current document data
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await docRef.get() as DocumentSnapshot<Map<String, dynamic>>;
+
+    // Check if the 'kenyataan' field exists
+    bool kenyataanFieldExists =
+        documentSnapshot.data()?.containsKey('kenyataan') ?? false;
+
+    if (kenyataanFieldExists) {
+      // 'kenyataan' field exists, update its value
+      await docRef.update({
+        'kenyataan': kenyataan,
+      });
+    } else {
+      // 'kenyataan' field doesn't exist, create it
+      await docRef.set(
+          {
+            'kenyataan': kenyataan,
+            // You can add other fields as needed
+          },
+          SetOptions(
+              merge:
+                  true)); // Use merge option to add 'kenyataan' without deleting existing fields
+    }
+  }
 }
+
+// Function to store kenyataan value in Firebase
