@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class GetAttendance extends StatefulWidget {
   final String studentId;
@@ -123,7 +126,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                           onTap: () {
                             _showConfirmationDialog(context, attendanceDocId);
                           },
-                          child: Icon(Icons.create_rounded),
+                          child: const Icon(Icons.create_rounded),
                         ),
                       ),
                     ],
@@ -144,77 +147,126 @@ class _GetAttendanceState extends State<GetAttendance> {
     String studentId = widget.studentId;
     String studentName = widget.studentName;
     String documentId = attendanceDocId;
+
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await FirebaseFirestore.instance
+            .collection('Students')
+            .doc(studentId)
+            .collection('Attendance')
+            .doc(attendanceDocId)
+            .get();
+
+// Check if the 'kenyataan' field exists
+    bool kenyataanFieldExists =
+        documentSnapshot.data()?.containsKey('kenyataan') ?? false;
+
+    // If 'kenyataan' field exists, get its value
+    if (kenyataanFieldExists) {
+      kenyataan = documentSnapshot['kenyataan'] as String;
+    }
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Catatan'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('ID Pelajar: $studentId'),
-                Text('Nama: $studentName'),
-                Text('Date: $documentId'),
-                SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Kenyataan',
-                  ),
-                  onChanged: (value) {
-                    kenyataan = value;
-                  },
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        FilePickerResult? result =
-                            await FilePicker.platform.pickFiles(
-                          type: FileType.custom,
-                          allowedExtensions: ['pdf'],
-                        );
-
-                        if (result != null) {
-                          filePath = result.files.first.path!;
-                          setState(() {});
-                        }
-                      },
-                      child: Text('Pick PDF'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Catatan'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('ID Pelajar: $studentId'),
+                    Text('Nama: $studentName'),
+                    Text('Date: $documentId'),
+                    const SizedBox(
+                      height: 10,
                     ),
-                    SizedBox(width: 10),
-                    Text(filePath ?? 'No file selected'),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Kenyataan',
+                      ),
+                      controller: TextEditingController(text: kenyataan),
+                      onChanged: (value) {
+                        kenyataan = value;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            FilePickerResult? result =
+                                await FilePicker.platform.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: ['pdf'],
+                            );
+
+                            if (result != null) {
+                              filePath = result.files.first.path!;
+                              setState(() {});
+                            }
+                          },
+                          child: const Text('Pick PDF'),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(filePath != null
+                            ? filePath!
+                                .split('/')
+                                .last // Displaying only the file name
+                            : 'No file selected'),
+                      ],
+                    ),
                   ],
                 ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Yes'),
+                  onPressed: () async {
+                    // Upload file to Firebase Storage
+                    String? uploadedFileURL =
+                        await uploadFileToFirebaseStorage(filePath);
+
+                    // Save 'kenyataan' and file reference to Firestore
+                    storeDataInFirebase(kenyataan, uploadedFileURL, documentId);
+
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                storeKenyataanInFirebase(kenyataan, documentId);
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> storeKenyataanInFirebase(
-      String kenyataan, String attendanceDocId) async {
+  Future<String?> uploadFileToFirebaseStorage(String? filePath) async {
+    if (filePath != null) {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      String fileName = filePath.split('/').last;
+      Reference storageReference = storage.ref().child('attendance/$fileName');
+
+      File file = File(filePath);
+      await storageReference.putFile(file);
+
+      // Get the download URL of the uploaded file
+      String downloadURL = await storageReference.getDownloadURL();
+      return downloadURL;
+    }
+    return null;
+  }
+
+  Future<void> storeDataInFirebase(
+      String kenyataan, String? fileURL, String attendanceDocId) async {
     CollectionReference attendanceCollection = FirebaseFirestore.instance
         .collection('Students')
         .doc(widget.studentId)
@@ -232,23 +284,34 @@ class _GetAttendanceState extends State<GetAttendance> {
     bool kenyataanFieldExists =
         documentSnapshot.data()?.containsKey('kenyataan') ?? false;
 
+    bool fileURLFieldExists =
+        documentSnapshot.data()?.containsKey('fileURL') ?? false;
+
+    Map<String, dynamic> dataToUpdate = {
+      'kenyataan': kenyataan,
+    };
+
+    // If fileURL is available, add it to the data
+    if (fileURL != null) {
+      // If 'fileURL' field exists, update its value
+      if (fileURLFieldExists) {
+        dataToUpdate['fileURL'] = fileURL;
+      } else {
+        // 'fileURL' field doesn't exist, create it
+        dataToUpdate['fileURL'] = fileURL;
+      }
+    }
+
     if (kenyataanFieldExists) {
       // 'kenyataan' field exists, update its value
-      await docRef.update({
-        'kenyataan': kenyataan,
-      });
+      await docRef.update(dataToUpdate);
     } else {
       // 'kenyataan' field doesn't exist, create it
       await docRef.set(
-          {
-            'kenyataan': kenyataan,
-            // You can add other fields as needed
-          },
+          dataToUpdate,
           SetOptions(
               merge:
                   true)); // Use merge option to add 'kenyataan' without deleting existing fields
     }
   }
 }
-
-// Function to store kenyataan value in Firebase
