@@ -1,49 +1,61 @@
+// Import necessary Dart and Flutter packages
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+// Define a Flutter StatefulWidget for getting attendance
 class GetAttendance extends StatefulWidget {
   final String studentId;
   final String studentName;
 
-  const GetAttendance(
-      {super.key, required this.studentId, required this.studentName});
+  // Constructor for GetAttendance widget
+  const GetAttendance({
+    Key? key,
+    required this.studentId,
+    required this.studentName,
+  }) : super(key: key);
 
   @override
   _GetAttendanceState createState() => _GetAttendanceState();
 }
 
+// Define the state for GetAttendance widget
 class _GetAttendanceState extends State<GetAttendance> {
+  // Declare initial variables
   late String initialKenyataan = '';
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    // Create a reference to the attendance collection in Firestore
     CollectionReference attendanceCollection = FirebaseFirestore.instance
         .collection('Students')
         .doc(widget.studentId)
         .collection('Attendance');
 
+    // Build a stream builder to handle real-time data changes
     return StreamBuilder<QuerySnapshot>(
       stream:
           attendanceCollection.orderBy('date', descending: true).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        // Handle errors
         if (snapshot.hasError) {
           return const Text("Something went wrong");
         }
 
+        // Show a loading indicator while waiting for data
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         }
 
+        // If there is no data, display a message
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Text("No data available");
         }
 
+        // Build the attendance list UI
         return Scaffold(
           appBar: AppBar(
             title: const Text("ATTENDANCE"),
@@ -53,41 +65,51 @@ class _GetAttendanceState extends State<GetAttendance> {
             child: ListView.builder(
               itemCount: snapshot.data!.docs.length + 1,
               itemBuilder: (context, index) {
+                // Display header row
                 if (index == 0) {
                   return ListTile(
                     tileColor: Colors.teal.shade100,
                     title: const Row(
                       children: [
                         Expanded(
+                          child: Text(
+                            "Tarikh",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.center,
                             child: Text(
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                                "Tarikh")),
+                              "Hadir",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                         Expanded(
-                            child: Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    "Hadir"))),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Tidak Hadir",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                         Expanded(
-                            child: Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    "Tidak Hadir"))),
-                        Expanded(
-                            child: Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    "Catatan"))),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Catatan",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   );
                 }
 
+                // Display attendance data
                 QueryDocumentSnapshot<Object?> document =
                     snapshot.data!.docs[index - 1];
                 Timestamp date = document['date'] as Timestamp;
@@ -140,14 +162,18 @@ class _GetAttendanceState extends State<GetAttendance> {
     );
   }
 
+  // Show confirmation dialog for updating attendance details
   Future<void> _showConfirmationDialog(
       BuildContext context, String attendanceDocId) async {
+    // Initialize variables
     String kenyataan = "";
     String? filePath;
     String studentId = widget.studentId;
     String studentName = widget.studentName;
     String documentId = attendanceDocId;
+    String? fileName;
 
+    // Retrieve document snapshot from Firestore
     DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
         await FirebaseFirestore.instance
             .collection('Students')
@@ -156,7 +182,7 @@ class _GetAttendanceState extends State<GetAttendance> {
             .doc(attendanceDocId)
             .get();
 
-// Check if the 'kenyataan' field exists
+    // Check if the 'kenyataan' field exists
     bool kenyataanFieldExists =
         documentSnapshot.data()?.containsKey('kenyataan') ?? false;
 
@@ -165,6 +191,16 @@ class _GetAttendanceState extends State<GetAttendance> {
       kenyataan = documentSnapshot['kenyataan'] as String;
     }
 
+    // Check if the 'fileName' field exists
+    bool fileNameFieldExists =
+        documentSnapshot.data()?.containsKey('fileName') ?? false;
+
+    // If 'fileName' field exists, get its value
+    if (fileNameFieldExists) {
+      fileName = documentSnapshot['fileName'] as String;
+    }
+
+    // Show the confirmation dialog
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -197,24 +233,25 @@ class _GetAttendanceState extends State<GetAttendance> {
                       children: [
                         ElevatedButton(
                           onPressed: () async {
+                            // Pick a PDF file using file picker
                             FilePickerResult? result =
                                 await FilePicker.platform.pickFiles(
                               type: FileType.custom,
                               allowedExtensions: ['pdf'],
                             );
 
+                            // If a file is picked, update file path and name
                             if (result != null) {
                               filePath = result.files.first.path!;
+                              fileName = filePath!.split('/').last;
                               setState(() {});
                             }
                           },
                           child: const Text('Pick PDF'),
                         ),
                         const SizedBox(width: 10),
-                        Text(filePath != null
-                            ? filePath!
-                                .split('/')
-                                .last // Displaying only the file name
+                        Text(filePath != null || fileName != null
+                            ? fileName! // Displaying only the file name
                             : 'No file selected'),
                       ],
                     ),
@@ -230,7 +267,8 @@ class _GetAttendanceState extends State<GetAttendance> {
                         await uploadFileToFirebaseStorage(filePath);
 
                     // Save 'kenyataan' and file reference to Firestore
-                    storeDataInFirebase(kenyataan, uploadedFileURL, documentId);
+                    storeDataInFirebase(
+                        kenyataan, uploadedFileURL, fileName, documentId);
 
                     Navigator.of(context).pop();
                   },
@@ -249,6 +287,7 @@ class _GetAttendanceState extends State<GetAttendance> {
     );
   }
 
+  // Upload a file to Firebase Storage
   Future<String?> uploadFileToFirebaseStorage(String? filePath) async {
     if (filePath != null) {
       FirebaseStorage storage = FirebaseStorage.instance;
@@ -265,8 +304,9 @@ class _GetAttendanceState extends State<GetAttendance> {
     return null;
   }
 
-  Future<void> storeDataInFirebase(
-      String kenyataan, String? fileURL, String attendanceDocId) async {
+  // Store updated data in Firestore
+  Future<void> storeDataInFirebase(String kenyataan, String? fileURL,
+      String? fileName, String attendanceDocId) async {
     CollectionReference attendanceCollection = FirebaseFirestore.instance
         .collection('Students')
         .doc(widget.studentId)
@@ -284,9 +324,15 @@ class _GetAttendanceState extends State<GetAttendance> {
     bool kenyataanFieldExists =
         documentSnapshot.data()?.containsKey('kenyataan') ?? false;
 
+    // Check if the 'fileURL' field exists
     bool fileURLFieldExists =
         documentSnapshot.data()?.containsKey('fileURL') ?? false;
 
+    // Check if the 'fileName' field exists
+    bool fileNameFieldExist =
+        documentSnapshot.data()?.containsKey('fileName') ?? false;
+
+    // Define the data to update in Firestore
     Map<String, dynamic> dataToUpdate = {
       'kenyataan': kenyataan,
     };
@@ -302,8 +348,17 @@ class _GetAttendanceState extends State<GetAttendance> {
       }
     }
 
+    // If fileName is available, add it to the data
+    if (fileName != null) {
+      if (fileNameFieldExist) {
+        dataToUpdate['fileName'] = fileName;
+      } else {
+        dataToUpdate['fileName'] = fileName;
+      }
+    }
+
+    // If 'kenyataan' field exists, update its value
     if (kenyataanFieldExists) {
-      // 'kenyataan' field exists, update its value
       await docRef.update(dataToUpdate);
     } else {
       // 'kenyataan' field doesn't exist, create it
