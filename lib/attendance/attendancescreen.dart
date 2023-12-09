@@ -112,9 +112,28 @@ class _GetAttendanceState extends State<GetAttendance> {
                 // Display attendance data
                 QueryDocumentSnapshot<Object?> document =
                     snapshot.data!.docs[index - 1];
-                Timestamp date = document['date'] as Timestamp;
-                bool status = document['status'] as bool;
-                String time = document['time'] as String;
+
+                // Explicitly cast the 'Object' type to 'Map<String, dynamic>'
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+
+                Timestamp date = data['date'] as Timestamp;
+                bool status = data['status'] as bool;
+                String time = data['time'] as String;
+
+                // Check if 'kenyataan' field exists in the document
+                bool kenyataanFieldExist = data.containsKey('kenyataan');
+
+                // If 'kenyataan' field exists, get its value; otherwise, assign an empty string
+                String kenyataan =
+                    kenyataanFieldExist ? data['kenyataan'] as String : '';
+
+                // Check if 'fileName' field exists in the document
+                bool fileNameFieldExist = data.containsKey('fileName');
+
+                // If 'fileName' field exists, get its value; otherwise, assign an empty string
+                String fileName =
+                    fileNameFieldExist ? data['fileName'] as String : '';
 
                 DateTime toDate = date.toDate();
                 String formattedDate = DateFormat('dd MMM y').format(toDate);
@@ -144,11 +163,13 @@ class _GetAttendanceState extends State<GetAttendance> {
                             : const Icon(Icons.radio_button_off),
                       ),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () {
+                        child: ElevatedButton(
+                          onPressed: () {
                             _showConfirmationDialog(context, attendanceDocId);
                           },
-                          child: const Icon(Icons.create_rounded),
+                          child: (kenyataan.isEmpty && fileName.isEmpty)
+                              ? const Icon(Icons.add)
+                              : const Icon((Icons.create_rounded)),
                         ),
                       ),
                     ],
