@@ -24,9 +24,6 @@ class GetAttendance extends StatefulWidget {
 
 // Define the state for GetAttendance widget
 class _GetAttendanceState extends State<GetAttendance> {
-  // Declare initial variables
-  late String initialKenyataan = '';
-
   @override
   Widget build(BuildContext context) {
     // Create a reference to the attendance collection in Firestore
@@ -117,28 +114,18 @@ class _GetAttendanceState extends State<GetAttendance> {
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
 
-                Timestamp date = data['date'] as Timestamp;
-                bool status = data['status'] as bool;
-                String time = data['time'] as String;
-
-                // Check if 'kenyataan' field exists in the document
-                bool kenyataanFieldExist = data.containsKey('kenyataan');
-
-                // If 'kenyataan' field exists, get its value; otherwise, assign an empty string
-                String kenyataan =
-                    kenyataanFieldExist ? data['kenyataan'] as String : '';
-
-                // Check if 'fileName' field exists in the document
-                bool fileNameFieldExist = data.containsKey('fileName');
-
-                // If 'fileName' field exists, get its value; otherwise, assign an empty string
-                String fileName =
-                    fileNameFieldExist ? data['fileName'] as String : '';
-
-                DateTime toDate = date.toDate();
-                String formattedDate = DateFormat('dd MMM y').format(toDate);
+                Timestamp? date = data['date'] as Timestamp?;
+                String? fileName = data['fileName'] as String?;
+                String? fileURL = data['fileURL'] as String?;
+                bool? hasNewAttendance = data['hasNewAttendance'] as bool?;
+                String? statement = data['statement'] as String?;
+                bool? status = data['status'] as bool?;
+                String? time = data['time'] as String?;
 
                 String attendanceDocId = document.id;
+
+                DateTime? toDate = date?.toDate();
+                String formattedDate = DateFormat('dd MMM y').format(toDate!);
 
                 return ListTile(
                   title: Row(
@@ -147,7 +134,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                         child: Text("$formattedDate ($time)"),
                       ),
                       Expanded(
-                        child: status
+                        child: status!
                             ? const Align(
                                 alignment: Alignment.center,
                                 child: Icon(Icons.radio_button_on),
@@ -167,9 +154,9 @@ class _GetAttendanceState extends State<GetAttendance> {
                           onPressed: () {
                             _showConfirmationDialog(context, attendanceDocId);
                           },
-                          child: (kenyataan.isEmpty && fileName.isEmpty)
-                              ? const Icon(Icons.add)
-                              : const Icon((Icons.create_rounded)),
+                          child: (statement != null)
+                              ? const Icon(Icons.create_rounded)
+                              : const Icon((Icons.add)),
                         ),
                       ),
                     ],
@@ -183,16 +170,122 @@ class _GetAttendanceState extends State<GetAttendance> {
     );
   }
 
-  // Show confirmation dialog for updating attendance details
   Future<void> _showConfirmationDialog(
       BuildContext context, String attendanceDocId) async {
+    String studentId = widget.studentId;
+    String studentName = widget.studentName;
+
+    CollectionReference attendanceCollection = FirebaseFirestore.instance
+        .collection('Students')
+        .doc(studentId)
+        .collection('Attendance');
+    DocumentReference attendanceDoc = attendanceCollection.doc(attendanceDocId);
+
+    DocumentSnapshot attendanceSnapshot = await attendanceDoc.get();
+
+    Map<String, dynamic> data =
+        attendanceSnapshot.data() as Map<String, dynamic>;
+
+    Timestamp? date = data['date'] as Timestamp?;
+    String? fileName = data['fileName'] as String?;
+    String? fileURL = data['fileURL'] as String?;
+    bool? hasNewAttendance = data['hasNewAttendance'] as bool?;
+    String? statement = data['statement'] as String?;
+    bool? status = data['status'] as bool?;
+    String? time = data['time'] as String?;
+
+    DateTime? toDate = date?.toDate();
+    String formattedDate = DateFormat('dd MMM y').format(toDate!);
+
+    if (fileName == null) {
+      fileName = "Tiada Fail";
+    }
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Catatan'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text("Tarikh: $formattedDate"),
+                    Text("Nama: $studentName"),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Kenyataan',
+                      ),
+                      controller: TextEditingController(text: statement),
+                      onChanged: (value) {
+                        statement = value;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf'],
+                        );
+                        if (result != null) {
+                          fileURL = result.files.first.path!;
+                          fileName = fileURL!.split('/').last;
+                          setState(
+                              () {}); // Trigger a rebuild with updated state
+                        }
+                      },
+                      child: const Text("Pilih fail"),
+                    ),
+                    Text(fileName!), // Display the updated fileName
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Batal'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Hantar'),
+                  onPressed: () async {
+                    // Upload file to Firebase Storage
+                    String? uploadedFileURL =
+                        await uploadFileToFirebaseStorage(fileURL);
+
+                    // Save 'kenyataan' and file reference to Firestore
+                    storeDataInFirebase(
+                        statement!, uploadedFileURL, fileName, attendanceDocId);
+
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Show confirmation dialog for updating attendance details
+  Future<void> _showConfirmationDialog2(
+      BuildContext context, String attendanceDocId) async {
     // Initialize variables
-    String kenyataan = "";
-    String? filePath;
+
     String studentId = widget.studentId;
     String studentName = widget.studentName;
     String documentId = attendanceDocId;
-    String? fileName;
 
     // Retrieve document snapshot from Firestore
     DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
@@ -204,21 +297,36 @@ class _GetAttendanceState extends State<GetAttendance> {
             .get();
 
     // Check if the 'kenyataan' field exists
-    bool kenyataanFieldExists =
-        documentSnapshot.data()?.containsKey('kenyataan') ?? false;
-
-    // If 'kenyataan' field exists, get its value
-    if (kenyataanFieldExists) {
-      kenyataan = documentSnapshot['kenyataan'] as String;
-    }
+    // bool kenyataanFieldExists =
+    //     documentSnapshot.data()?.containsKey('kenyataan') ?? false;
+    //
+    // // If 'kenyataan' field exists, get its value
+    // if (kenyataanFieldExists) {
+    //   kenyataan = documentSnapshot['kenyataan'] as String;
+    // }
 
     // Check if the 'fileName' field exists
-    bool fileNameFieldExists =
-        documentSnapshot.data()?.containsKey('fileName') ?? false;
+    // bool fileNameFieldExists =
+    //     documentSnapshot.data()?.containsKey('fileName') ?? false;
+    //
+    // // If 'fileName' field exists, get its value
+    // if (fileNameFieldExists) {
+    //   fileName = documentSnapshot['fileName'] as String;
+    // }
 
-    // If 'fileName' field exists, get its value
-    if (fileNameFieldExists) {
-      fileName = documentSnapshot['fileName'] as String;
+    Timestamp? date = documentSnapshot['date'] as Timestamp?;
+    String? fileName = documentSnapshot['fileName'] as String?;
+    String? fileURL = documentSnapshot['fileURL'] as String?;
+    bool? hasNewAttendance = documentSnapshot['hasNewAttendance'] as bool?;
+    String? statement = documentSnapshot['statement'] as String?;
+    bool? status = documentSnapshot['status'] as bool?;
+    String? time = documentSnapshot['time'] as String?;
+
+    DateTime? toDate = date?.toDate();
+    String formattedDate = DateFormat('dd MMM y').format(toDate!);
+
+    if (fileName == null) {
+      fileName = "Tiada fail";
     }
 
     // Show the confirmation dialog
@@ -234,7 +342,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                   children: <Widget>[
                     Text('ID Pelajar: $studentId'),
                     Text('Nama: $studentName'),
-                    Text('Date: $documentId'),
+                    Text('Tarikh: $formattedDate'),
                     const SizedBox(
                       height: 10,
                     ),
@@ -242,9 +350,9 @@ class _GetAttendanceState extends State<GetAttendance> {
                       decoration: const InputDecoration(
                         labelText: 'Kenyataan',
                       ),
-                      controller: TextEditingController(text: kenyataan),
+                      controller: TextEditingController(text: statement),
                       onChanged: (value) {
-                        kenyataan = value;
+                        statement = value;
                       },
                     ),
                     const SizedBox(
@@ -263,17 +371,15 @@ class _GetAttendanceState extends State<GetAttendance> {
 
                             // If a file is picked, update file path and name
                             if (result != null) {
-                              filePath = result.files.first.path!;
-                              fileName = filePath!.split('/').last;
+                              fileURL = result.files.first.path!;
+                              fileName = fileURL!.split('/').last;
                               setState(() {});
                             }
                           },
                           child: const Text('Pick PDF'),
                         ),
                         const SizedBox(width: 10),
-                        Text(filePath != null || fileName != null
-                            ? fileName! // Displaying only the file name
-                            : 'No file selected'),
+                        Text(fileName!),
                       ],
                     ),
                   ],
@@ -285,11 +391,11 @@ class _GetAttendanceState extends State<GetAttendance> {
                   onPressed: () async {
                     // Upload file to Firebase Storage
                     String? uploadedFileURL =
-                        await uploadFileToFirebaseStorage(filePath);
+                        await uploadFileToFirebaseStorage(fileURL);
 
                     // Save 'kenyataan' and file reference to Firestore
                     storeDataInFirebase(
-                        kenyataan, uploadedFileURL, fileName, documentId);
+                        statement!, uploadedFileURL, fileName, documentId);
 
                     Navigator.of(context).pop();
                   },
@@ -325,8 +431,21 @@ class _GetAttendanceState extends State<GetAttendance> {
     return null;
   }
 
+  Future<void> storeDataInFirebase(String statement, String? fileURL,
+      String? fileName, String attendanceDocId) async {
+    CollectionReference attendanceCollection = FirebaseFirestore.instance
+        .collection('Students')
+        .doc(widget.studentId)
+        .collection('Attendance');
+
+    DocumentReference attendanceDoc = attendanceCollection.doc(attendanceDocId);
+
+    await attendanceDoc.update(
+        {'statement': statement, 'fileURL': fileURL, 'fileName': fileName});
+  }
+
   // Store updated data in Firestore
-  Future<void> storeDataInFirebase(String kenyataan, String? fileURL,
+  Future<void> storeDataInFirebase2(String kenyataan, String? fileURL,
       String? fileName, String attendanceDocId) async {
     CollectionReference attendanceCollection = FirebaseFirestore.instance
         .collection('Students')

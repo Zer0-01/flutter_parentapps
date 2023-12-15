@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:parentapps/menuscreen/menuScreen.dart';
+import 'package:parentapps/menuscreen/menu_screen.dart';
 
 class ChildrenScreen extends StatelessWidget {
   const ChildrenScreen({super.key});
@@ -50,6 +50,7 @@ class ChildrenScreen extends StatelessWidget {
                         .data() as Map<String, dynamic>;
 
                     String childrenName = data['name'] as String;
+                    String? childrenId = snapshot.data?.docs[index].id;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -57,7 +58,7 @@ class ChildrenScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
-                                MenuScreen(childrenName: childrenName),
+                                MenuScreen(childrenName: childrenName, childrenId: childrenId),
                           ));
                           // Handle button press for the specific child
                           // For example, navigate to a new screen or perform an action
@@ -68,7 +69,7 @@ class ChildrenScreen extends StatelessWidget {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(childrenName),
+                          child: Text("$childrenName ($childrenId)"),
                         ),
                       ),
                     );

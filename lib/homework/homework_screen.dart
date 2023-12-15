@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'homework_detail.dart';
 
 class GetHomework extends StatelessWidget {
   String className;
@@ -40,14 +41,19 @@ class GetHomework extends StatelessWidget {
               Map<String, dynamic> data =
                   snapshot.data!.docs[index].data() as Map<String, dynamic>;
 
-              String subject = data['subject'] as String;
-              String description = data['description'] as String;
-              Timestamp dueDate = data['dueDate'] as Timestamp;
-              String title = data['title'] as String;
+              String homeworkId = snapshot.data!.docs[index].id;
+              String? className = data['class'] as String?;
+              String? description = data['description'] as String?;
+              String? downloadURL = data['downloadURL'] as String?;
+              Timestamp? dueDate = data['dueDate'] as Timestamp?;
+              String? subject = data['subject'] as String?;
+              String? teacherId = data['teacherId'] as String?;
+              String? title = data['title'] as String?;
+
 
               DateTime currentDate = DateTime.now();
               int daysRemaining;
-              DateTime due = dueDate.toDate();
+              DateTime due = dueDate!.toDate();
               Color colourStatus;
 
               if (due.isBefore(currentDate)) {
@@ -69,11 +75,13 @@ class GetHomework extends StatelessWidget {
               return ListTile(
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  title: Card(
-                    elevation: 4, // Add elevation for a shadow effect
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
+                  title: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => homeworkDetails(
+                           homeworkId: homeworkId,
+                          )));
+                    },
                     child: Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -103,7 +111,7 @@ class GetHomework extends StatelessWidget {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            subject,
+                            subject!,
                             style: TextStyle(
                               color: Colors.black, // Set text color to black
                               fontWeight: FontWeight.bold,
@@ -112,7 +120,7 @@ class GetHomework extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            title,
+                            title!,
                             style: TextStyle(
                               color: Colors.black, // Set text color to black
                               fontSize: 16,
@@ -120,7 +128,7 @@ class GetHomework extends StatelessWidget {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            description,
+                            description!,
                             style: TextStyle(
                               color: Colors.black, // Set text color to black
                               fontSize: 14,

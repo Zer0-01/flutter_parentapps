@@ -51,6 +51,7 @@ dependencies:
   get: ^4.6.5
   intl: ^0.18.1
   file_picker: ^6.1.1
+  badges: ^3.1.2
 
 
 
