@@ -54,6 +54,7 @@ class MenuScreen extends StatelessWidget {
             snapshot.data?.docs[0].data() as Map<String, dynamic>;
         String name = data['name'] as String;
         String childrenClass = data['classID'] as String;
+        String parentId = data['parentId'] as String;
         String documentId = documentSnapshot.id;
 
         return StreamBuilder(
@@ -147,7 +148,7 @@ class MenuScreen extends StatelessWidget {
                           icons: Icons.assignment,
                           onpress: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => GetHomework(childrenClass),
+                              builder: (context) => GetHomework(childrenClass, parentId),
                             ));
                           },
                         ),

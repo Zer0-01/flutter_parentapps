@@ -4,8 +4,9 @@ import 'homework_detail.dart';
 
 class GetHomework extends StatelessWidget {
   String className;
+  String parentId;
 
-  GetHomework(this.className, {super.key});
+  GetHomework(this.className, this.parentId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,6 @@ class GetHomework extends StatelessWidget {
               String? teacherId = data['teacherId'] as String?;
               String? title = data['title'] as String?;
 
-
               DateTime currentDate = DateTime.now();
               int daysRemaining;
               DateTime due = dueDate!.toDate();
@@ -79,8 +79,9 @@ class GetHomework extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => homeworkDetails(
-                           homeworkId: homeworkId,
-                          )));
+                                homeworkId: homeworkId,
+                                parentId: parentId,
+                              )));
                     },
                     child: Container(
                       padding: EdgeInsets.all(16),

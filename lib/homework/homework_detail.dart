@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:parentapps/homework/homework_file.dart';
 
+// ignore: must_be_immutable
 class homeworkDetails extends StatefulWidget {
   String? homeworkId;
+  String? parentId;
 
-  homeworkDetails({this.homeworkId});
+  homeworkDetails({this.homeworkId, this.parentId});
 
   _homeworkDetailsState createState() => _homeworkDetailsState();
 }
 
 class _homeworkDetailsState extends State<homeworkDetails> {
+  TextEditingController commentController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -44,57 +49,192 @@ class _homeworkDetailsState extends State<homeworkDetails> {
         String? teacherId = data['teacherId'] as String?;
         String? title = data['title'] as String?;
 
-        print(homeworkId);
+        CollectionReference parentCollection =
+            FirebaseFirestore.instance.collection('Parents');
+        DocumentReference parentDoc = parentCollection.doc(widget.parentId);
 
-        // Now you can use data and homeworkId as needed
+        return StreamBuilder(
+            stream: parentDoc.snapshots(),
+            builder: (context, parentSnapshot) {
+              if (parentSnapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // or another loading indicator
+              }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(homeworkId),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title ?? '',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+              if (parentSnapshot.hasError) {
+                return Text('Error: ${parentSnapshot.error}');
+              }
+
+              if (!parentSnapshot.hasData || parentSnapshot.data == null) {
+                return Text('No data available');
+              }
+
+              DocumentSnapshot parentDocSnapshot = parentSnapshot.data!;
+              Map<String, dynamic> parentData =
+                  parentDocSnapshot.data() as Map<String, dynamic>;
+              String parentName = parentData['name'] as String;
+              String parentId = parentDocSnapshot.id;
+
+              return Scaffold(
+                backgroundColor: Colors.grey.shade300,
+                appBar: AppBar(
+                  title: Text(homeworkId),
+                ),
+                body: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title ?? '',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Class: ${className ?? ''}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        Text(
+                          'Subject: ${subject ?? ''}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        Text(
+                          'Due Date: ${dueDate?.toDate() ?? ''}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Description:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          description ?? 'No description available.',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(height: 20),
+                        Visibility(
+                          visible: downloadURL != null,
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => homeworkFile(
+                                    homeworkId, title!, downloadURL!),
+                              ));
+                            },
+                            icon: Icon(Icons.file_present_rounded),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        TextField(
+                          controller: commentController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your comment',
+                          ),
+                        ),
+
+                        // Add a button to submit the comment
+                        ElevatedButton(
+                          onPressed: () {
+                            String newComment = commentController.text.trim();
+                            if (newComment.isNotEmpty) {
+                              DateTime currentTime = DateTime.now();
+                              // Save the new comment to the "Comment" subcollection
+                              homeworkDoc.collection('Comment').add({
+                                'parentName': parentName,
+                                'message': newComment,
+                                'time': currentTime,
+                              });
+
+                              print(currentTime);
+
+                              // Clear the input field after submitting the comment
+                              commentController.clear();
+                            }
+                          },
+                          child: Text('Send'),
+                        ),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: homeworkDoc.collection('Comment').orderBy('time', descending: true).snapshots(),
+                          builder: (context, commentSnapshot) {
+                            if (commentSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            }
+
+                            if (commentSnapshot.hasError) {
+                              return Text('Error: ${commentSnapshot.error}');
+                            }
+
+                            List<Widget> commentWidgets = [];
+                            commentWidgets.add(
+                              Text(
+                                'Comments:',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+
+                            for (QueryDocumentSnapshot commentDoc
+                                in commentSnapshot.data!.docs) {
+                              Map<String, dynamic> commentData =
+                                  commentDoc.data() as Map<String, dynamic>;
+                              String parentName =
+                                  commentData['parentName'] as String;
+                              String message = commentData['message'] as String;
+                              Timestamp? time =
+                                  commentData['time'] as Timestamp?;
+
+                              DateTime dateTime = time!.toDate();
+                              String stringTime =
+                                  "${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
+
+                              commentWidgets.add(
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          parentName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Text(stringTime),
+                                      ],
+                                    ),
+                                    Text(message),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: commentWidgets,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Class: ${className ?? ''}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'Subject: ${subject ?? ''}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'Due Date: ${dueDate?.toDate() ?? ''}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Description:',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  description ?? 'No description available.',
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 20),
-                // Add more widgets as needed for other details
-              ],
-            ),
-          ),
-        );
+              );
+            });
       },
     );
   }
