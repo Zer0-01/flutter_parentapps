@@ -78,16 +78,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                           child: Align(
                             alignment: Alignment.center,
                             child: Text(
-                              "Hadir",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Tidak Hadir",
+                              "Kehadiran",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -127,39 +118,39 @@ class _GetAttendanceState extends State<GetAttendance> {
                 DateTime? toDate = date?.toDate();
                 String formattedDate = DateFormat('dd MMM y').format(toDate!);
 
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text("$formattedDate ($time)"),
-                      ),
-                      Expanded(
-                        child: status!
-                            ? const Align(
-                                alignment: Alignment.center,
-                                child: Icon(Icons.radio_button_on),
-                              )
-                            : const Icon(Icons.radio_button_off),
-                      ),
-                      Expanded(
-                        child: !status
-                            ? const Align(
-                                alignment: Alignment.center,
-                                child: Icon(Icons.radio_button_on),
-                              )
-                            : const Icon(Icons.radio_button_off),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _showConfirmationDialog(context, attendanceDocId);
-                          },
-                          child: (statement != null)
-                              ? const Icon(Icons.create_rounded)
-                              : const Icon((Icons.add)),
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey), // Set border color
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(8.0)), // Set border radius
+                  ),
+                  child: ListTile(
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text("$formattedDate ($time)"),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Container(
+                            child: Text(''),
+                            decoration: BoxDecoration(
+                              color: status! ? Colors.green : Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _showConfirmationDialog(context, attendanceDocId);
+                            },
+                            child: (statement != null)
+                                ? const Icon(Icons.create_rounded)
+                                : const Icon((Icons.add)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

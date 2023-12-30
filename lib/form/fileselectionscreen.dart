@@ -59,8 +59,8 @@ class _FileSelectionState extends State<FileSelection> {
           title: Text(widget.collectionName),
           bottom: TabBar(
             tabs: [
-              Tab(text: 'Permission'),
-              Tab(text: 'Announcement'),
+              Tab(text: 'Kebenaran'),
+              Tab(text: 'Pengumuman'),
             ],
           ),
         ),

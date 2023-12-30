@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:parentapps/login/signup_screen.dart';
 import '../childrenscreen/childrenscreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    hintText: 'Phone Number',
+                    hintText: 'Nombor Telefon',
                     prefixIcon: Icon(Icons.person),
                     //errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
                   ),
@@ -80,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: const Text(
-                  'Signin',
+                  'Log Masuk',
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () async {
@@ -102,6 +103,35 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }
                 },
+              ),
+              SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      // TODO: Implement forgot password logic
+                      print('Forgot Password');
+                    },
+                    child: Text(
+                      'Lupa Password?',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      // TODO: Implement sign-up logic
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SignupScreen(),
+                      ));
+                      print('Sign Up Here');
+                    },
+                    child: Text(
+                      'Belum Mendaftar? Daftar Di Sini',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -162,7 +162,10 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                           child: Text('Send'),
                         ),
                         StreamBuilder<QuerySnapshot>(
-                          stream: homeworkDoc.collection('Comment').orderBy('time', descending: true).snapshots(),
+                          stream: homeworkDoc
+                              .collection('Comment')
+                              .orderBy('time', descending: true)
+                              .snapshots(),
                           builder: (context, commentSnapshot) {
                             if (commentSnapshot.connectionState ==
                                 ConnectionState.waiting) {

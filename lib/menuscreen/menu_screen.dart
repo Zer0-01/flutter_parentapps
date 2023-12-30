@@ -61,6 +61,19 @@ class MenuScreen extends StatelessWidget {
           stream:
               documentSnapshot.reference.collection("Attendance").snapshots(),
           builder: (context, attendanceSnapshot) {
+            if (attendanceSnapshot.hasError) {
+              return const Text("Something went wrong");
+            }
+
+            if (attendanceSnapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+
+            if (!attendanceSnapshot.hasData ||
+                attendanceSnapshot.data!.docs.isEmpty) {
+              return const Text("No data available");
+            }
+
             bool hasNewAttendance = false;
             for (QueryDocumentSnapshot attendanceDocumentSnapshot
                 in attendanceSnapshot.data!.docs) {
@@ -148,7 +161,8 @@ class MenuScreen extends StatelessWidget {
                           icons: Icons.assignment,
                           onpress: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => GetHomework(childrenClass, parentId),
+                              builder: (context) =>
+                                  GetHomework(childrenClass, parentId),
                             ));
                           },
                         ),
