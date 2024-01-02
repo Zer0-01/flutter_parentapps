@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      backgroundColor: Color(0xFFDFF4F3),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 100),
@@ -36,12 +36,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 30,
               ),
               Container(
-                color: Color(0xFFDDE7F2),
+                decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(2, 5),
+                  )
+                ]),
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     hintText: 'Nombor Telefon',
                     prefixIcon: Icon(Icons.person),
+                    border: InputBorder.none,
                     //errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
                   ),
                   onChanged: (value) {
@@ -56,12 +64,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 20,
               ),
               Container(
-                color: Color(0xFFDDE7F2),
+                decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(2, 5),
+                  )
+                ]),
                 child: TextField(
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: 'Password',
+                    hintText: 'Kata Laluan',
                     prefixIcon: const Icon(Icons.lock),
+                    border: InputBorder.none,
                     errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
                   ),
                   onChanged: (value) {
@@ -77,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF878ECD),
+                  backgroundColor: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: const Text(

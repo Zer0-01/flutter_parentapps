@@ -88,6 +88,7 @@ class MenuScreen extends StatelessWidget {
 
             return Scaffold(
               appBar: AppBar(
+                backgroundColor: Theme.of(context).primaryColor,
                 title: Text(extractName(name)),
                 actions: [
                   IconButton(
@@ -199,6 +200,30 @@ class MenuScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              bottomNavigationBar: BottomAppBar(
+                color: Colors.white,
+                // Set the background color of the bottom app bar
+                shape: CircularNotchedRectangle(),
+                // Notch in the bottom app bar for FAB
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.home),
+                      onPressed: () {
+                        // Handle Home button press
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.settings),
+                      onPressed: () {
+                        // Handle Settings button press
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
             );
           },
         );
