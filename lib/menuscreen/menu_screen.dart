@@ -74,157 +74,230 @@ class MenuScreen extends StatelessWidget {
               return const Text("No data available");
             }
 
-            bool hasNewAttendance = false;
+            bool newAttendance = false;
             for (QueryDocumentSnapshot attendanceDocumentSnapshot
                 in attendanceSnapshot.data!.docs) {
               Map<String, dynamic> attendanceData =
                   attendanceDocumentSnapshot.data() as Map<String, dynamic>;
-              bool? newFlag = attendanceData['newFlag'] as bool?;
-              if (newFlag != null && newFlag) {
-                hasNewAttendance = true;
+              bool? isNewAttendance =
+                  attendanceData['isNewAttendance'] as bool?;
+              if (isNewAttendance != null && isNewAttendance) {
+                newAttendance = true;
                 break;
               }
             }
 
-            return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Theme.of(context).primaryColor,
-                title: Text(extractName(name)),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () async {
-                      // Show a confirmation dialog
-                      bool confirmLogout = await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Confirm Logout'),
-                            content: Text('Are you sure you want to logout?'),
+            CollectionReference homeworkCollection =
+                FirebaseFirestore.instance.collection('Homework');
+            Query homework =
+                homeworkCollection.where('class', isEqualTo: childrenClass);
+
+            return StreamBuilder(
+                stream: homework.snapshots(),
+                builder: (context, homeworkSnapshot) {
+                  if (homeworkSnapshot.hasError) {
+                    return const Text("Something went wrong");
+                  }
+
+                  if (homeworkSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  if (!homeworkSnapshot.hasData ||
+                      homeworkSnapshot.data!.docs.isEmpty) {
+                    return const Text("No data available");
+                  }
+
+                  bool newHomework = false;
+                  for (QueryDocumentSnapshot homeworkDocumentSnapshot
+                      in homeworkSnapshot.data!.docs) {
+                    Map<String, dynamic> homeworkData =
+                        homeworkDocumentSnapshot.data() as Map<String, dynamic>;
+                    bool? isNewHomework =
+                        homeworkData['isNewHomework'] as bool?;
+                    if (isNewHomework != null && isNewHomework) {
+                      newHomework = true;
+                      break;
+                    }
+                  }
+
+                  CollectionReference formCollection =
+                      FirebaseFirestore.instance.collection('Forms');
+
+                  return StreamBuilder(
+                      stream: formCollection.snapshots(),
+                      builder: (context, formSnapshot) {
+                        if (formSnapshot.hasError) {
+                          return const Text("Something went wrong");
+                        }
+
+                        if (formSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        if (!formSnapshot.hasData ||
+                            formSnapshot.data!.docs.isEmpty) {
+                          return const Text("No data available");
+                        }
+
+                        bool newForm = false;
+                        for (QueryDocumentSnapshot formDocumentSnapshot
+                            in formSnapshot.data!.docs) {
+                          Map<String, dynamic> formData = formDocumentSnapshot
+                              .data() as Map<String, dynamic>;
+                          bool? isNewForm = formData['isNewForm'] as bool?;
+                          if (isNewForm != null && isNewForm) {
+                            newForm = true;
+                            break;
+                          }
+                        }
+
+                        return Scaffold(
+                          appBar: AppBar(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            title: Text(extractName(name)),
                             actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(false); // Cancel logout
+                              IconButton(
+                                icon: const Icon(Icons.logout),
+                                onPressed: () async {
+                                  // Show a confirmation dialog
+                                  bool confirmLogout = await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text('Confirm Logout'),
+                                        content: Text(
+                                            'Are you sure you want to logout?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(false); // Cancel logout
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(true); // Confirm logout
+                                            },
+                                            child: Text('Logout'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  // If user confirms logout, sign out
+                                  if (confirmLogout == true) {
+                                    await FirebaseAuth.instance.signOut();
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginScreen()),
+                                      (Route<dynamic> route) =>
+                                          false, // Clear all previous routes
+                                    );
+                                  }
                                 },
-                                child: Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(true); // Confirm logout
-                                },
-                                child: Text('Logout'),
                               ),
                             ],
-                          );
-                        },
-                      );
-
-                      // If user confirms logout, sign out
-                      if (confirmLogout == true) {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Clear all previous routes
+                          ),
+                          body: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: MainMenuCard(
+                                      showBadge: newAttendance,
+                                      colour: Colors.lightBlue.shade50,
+                                      title: ('Attendance'),
+                                      icons: Icons.fact_check,
+                                      onpress: () {
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (context) => GetAttendance(
+                                              studentId: documentId,
+                                              studentName: name),
+                                        ));
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: MainMenuCard(
+                                      showBadge: newHomework,
+                                      colour: Colors.lightBlue.shade50,
+                                      title: 'Homework',
+                                      icons: Icons.assignment,
+                                      onpress: () {
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (context) => GetHomework(
+                                              childrenClass, parentId),
+                                        ));
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: MainMenuCard(
+                                      showBadge: newForm,
+                                      colour: Colors.lightBlue.shade50,
+                                      title: 'Form',
+                                      icons: Icons.insert_drive_file,
+                                      onpress: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    FileSelection(
+                                                      collectionName: "Forms",
+                                                      childrenName: name,
+                                                      childrenId: documentId,
+                                                    )));
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          bottomNavigationBar: BottomAppBar(
+                            color: Colors.white,
+                            // Set the background color of the bottom app bar
+                            shape: CircularNotchedRectangle(),
+                            // Notch in the bottom app bar for FAB
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.home),
+                                  onPressed: () {
+                                    // Handle Home button press
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.settings),
+                                  onPressed: () {
+                                    // Handle Settings button press
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         );
-                      }
-                    },
-                  ),
-                ],
-              ),
-              body: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: MainMenuCard(
-                          showBadge: hasNewAttendance,
-                          colour: Colors.lightBlue.shade50,
-                          title: ('Attendance'),
-                          icons: Icons.fact_check,
-                          onpress: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => GetAttendance(
-                                  studentId: documentId, studentName: name),
-                            ));
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: MainMenuCard(
-                          colour: Colors.lightBlue.shade50,
-                          title: 'Homework',
-                          icons: Icons.assignment,
-                          onpress: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  GetHomework(childrenClass, parentId),
-                            ));
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                          child: MainMenuCard(
-                        colour: Colors.lightBlue.shade50,
-                        title: 'Grade',
-                        icons: Icons.auto_graph,
-                        onpress: () {},
-                      )),
-                      Expanded(
-                        child: MainMenuCard(
-                          colour: Colors.lightBlue.shade50,
-                          title: 'Form',
-                          icons: Icons.insert_drive_file,
-                          onpress: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => FileSelection(
-                                      collectionName: "Forms",
-                                      childrenName: name,
-                                      childrenId: documentId,
-                                    )));
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              bottomNavigationBar: BottomAppBar(
-                color: Colors.white,
-                // Set the background color of the bottom app bar
-                shape: CircularNotchedRectangle(),
-                // Notch in the bottom app bar for FAB
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.home),
-                      onPressed: () {
-                        // Handle Home button press
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.settings),
-                      onPressed: () {
-                        // Handle Settings button press
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-            );
+                      });
+                });
           },
         );
       },

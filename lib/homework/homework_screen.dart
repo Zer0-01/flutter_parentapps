@@ -2,11 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'homework_detail.dart';
 
-class GetHomework extends StatelessWidget {
+class GetHomework extends StatefulWidget {
   String className;
   String parentId;
 
   GetHomework(this.className, this.parentId, {super.key});
+
+
+
+  @override
+  _GetHomeworkState createState() => _GetHomeworkState();
+}
+
+class _GetHomeworkState extends State<GetHomework> {
+  @override
+  void initState(){
+    super.initState();
+    updateIsNewHomeworkField();
+
+  }
+
+  Future<void> updateIsNewHomeworkField() async {
+
+    print(widget.className);
+    // Get a reference to the documents in the 'Homework' collection
+    QuerySnapshot homeworkDocs = await FirebaseFirestore.instance
+        .collection('Homework')
+        .where('class', isEqualTo: widget.className)
+        .get();
+
+    // Update each document's hasNewAttendance field to false
+    for (QueryDocumentSnapshot doc in homeworkDocs.docs) {
+      try {
+        await doc.reference.update({
+          'isNewHomework': false,
+        });
+      } catch (error) {
+        print('Error updating hasNewHomework field: $error');
+        // Handle the error as needed
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +51,7 @@ class GetHomework extends StatelessWidget {
     CollectionReference homeworkCollection =
         FirebaseFirestore.instance.collection('Homework');
 
-    Query homework = homeworkCollection.where('class', isEqualTo: className);
+    Query homework = homeworkCollection.where('class', isEqualTo: widget.className);
 
     return StreamBuilder<QuerySnapshot>(
       stream: homework.orderBy('dueDate', descending: true).snapshots(),
@@ -80,7 +116,7 @@ class GetHomework extends StatelessWidget {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => homeworkDetails(
                                 homeworkId: homeworkId,
-                                parentId: parentId,
+                                parentId: widget.parentId,
                               )));
                     },
                     child: Container(

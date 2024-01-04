@@ -25,6 +25,28 @@ class _FileSelectionState extends State<FileSelection> {
   void initState() {
     super.initState();
     listFiles();
+    updateIsNewForm();
+  }
+
+  Future<void> updateIsNewForm() async {
+    // Reference to the 'forms' collection
+    CollectionReference formsCollection =
+        FirebaseFirestore.instance.collection('Forms');
+
+    // Get all documents in the 'forms' collection
+    QuerySnapshot formsDocs = await formsCollection.get();
+
+    // Update the isNewForm field to true for each document
+    for (QueryDocumentSnapshot doc in formsDocs.docs) {
+      try {
+        await doc.reference.update({
+          'isNewForm': false,
+        });
+      } catch (error) {
+        print('Error updating isNewForm field: $error');
+        // Handle the error as needed
+      }
+    }
   }
 
   Future<void> listFiles() async {

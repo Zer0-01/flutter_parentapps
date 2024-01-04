@@ -25,6 +25,32 @@ class GetAttendance extends StatefulWidget {
 // Define the state for GetAttendance widget
 class _GetAttendanceState extends State<GetAttendance> {
   @override
+  void initState() {
+    super.initState();
+    updateIsNewAttendance();
+  }
+
+  Future<void> updateIsNewAttendance() async {
+    CollectionReference attendanceCollection = FirebaseFirestore.instance
+        .collection('Students')
+        .doc(widget.studentId)
+        .collection('Attendance');
+
+    QuerySnapshot attendanceDocs = await attendanceCollection.get();
+
+    for (QueryDocumentSnapshot doc in attendanceDocs.docs) {
+      try {
+        await doc.reference.update({
+          'isNewAttendance': false,
+        });
+      } catch (error) {
+        print('Error updating isNewAttendance field: $error');
+        // Handle the error as needed
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Create a reference to the attendance collection in Firestore
     CollectionReference attendanceCollection = FirebaseFirestore.instance
