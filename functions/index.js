@@ -51,3 +51,39 @@ exports.updateIsNewHomework = functions.firestore
 
     return null;
   });
+
+exports.sendNotificationAttendance = functions.firestore
+  .document('Students/{studentId}/Attendance/{attendanceId}')
+  .onCreate((snap, context) => {
+    // const newData = snap.data();
+
+    // Extract childrenId from the path
+    const childrenId = context.params.studentId;
+
+    // Create a notification payload
+    const payload = {
+      notification: {
+        title: 'New Attendance Upload',
+        body: `Document ID: ${context.params.attendanceId}`,
+        // Add more notification options as needed
+      },
+      // Add additional data if needed
+      data: {
+        // Add custom data here
+      },
+    };
+
+    // Dynamically create the topic based on childrenId
+    const topic = `NotificationAttendance_${childrenId}`;
+
+    // Send the notification to the dynamically created topic
+    return admin.messaging().sendToTopic(topic, payload)
+      .then((response) => {
+        console.log('Notification sent successfully:', response);
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error sending notification:', error);
+        return null;
+      });
+  });

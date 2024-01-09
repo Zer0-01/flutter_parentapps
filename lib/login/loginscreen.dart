@@ -158,11 +158,49 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Function to navigate to the Sign Up screen
-  void navigateToSignUpScreen() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => SignupScreen(),
-    ));
+  Future<void> saveFCMTokenToFirestore(String email) async {
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+    // Get the FCM token
+    String? fcmToken = await firebaseMessaging.getToken();
+
+    // Save the FCM token to Firestore or wherever you want to store it
+    // For example, you can use FirebaseFirestore
+    if (fcmToken != null) {
+      await FirebaseFirestore.instance
+          .collection('Parents')
+          .doc(email)
+          .update({'fcmToken': fcmToken});
+
+      CollectionReference parentCollection =
+          FirebaseFirestore.instance.collection('Parents');
+      DocumentReference parentDocument = parentCollection.doc(email);
+
+      try {
+        // Get the document snapshot
+        DocumentSnapshot documentSnapshot = await parentDocument.get();
+
+        // Check if the document exists
+        if (documentSnapshot.exists) {
+          // Access the data using the data() method
+          Map<String, dynamic> data =
+              documentSnapshot.data() as Map<String, dynamic>;
+
+          String? childrenId = data['childrenId'];
+
+          print('Children Id: $childrenId');
+
+          String topic = 'NotificationAttendance_$childrenId';
+
+          await FirebaseMessaging.instance.subscribeToTopic(topic);
+          print('Subscribed to topic: $topic');
+        } else {
+          print('Document does not exist');
+        }
+      } catch (e) {
+        print('Error getting document: $e');
+      }
+    }
   }
 
   // Function to navigate to the ChildrenScreen
@@ -174,19 +212,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> saveFCMTokenToFirestore(String email) async {
-    FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-
-    // Get the FCM token
-    String? fcmToken = await _firebaseMessaging.getToken();
-
-    // Save the FCM token to Firestore or wherever you want to store it
-    // For example, you can use FirebaseFirestore
-    if (fcmToken != null) {
-      await FirebaseFirestore.instance
-          .collection('Parents')
-          .doc(email)
-          .update({'fcmToken': fcmToken});
-    }
+  // Function to navigate to the Sign Up screen
+  void navigateToSignUpScreen() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => SignupScreen(),
+    ));
   }
 }
