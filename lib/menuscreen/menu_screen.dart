@@ -116,6 +116,7 @@ class MenuScreen extends StatelessWidget {
                         homeworkDocumentSnapshot.data() as Map<String, dynamic>;
                     bool? isNewHomework =
                         homeworkData['isNewHomework'] as bool?;
+
                     if (isNewHomework != null && isNewHomework) {
                       newHomework = true;
                       break;

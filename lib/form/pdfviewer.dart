@@ -160,24 +160,31 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 ? PDFViewer(document: document!)
                 : Text('Error loading PDF')),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              _showPermissionBottomSheet();
-            },
-            child: Icon(Icons.edit),
-          ),
-          SizedBox(width: 16), // Add some space between buttons
-          FloatingActionButton(
-            onPressed: () {
-              // Add the functionality for the second button
-            },
-            child: Icon(Icons.download), // Replace with the desired icon
-          ),
-        ],
-      ),
+      floatingActionButton: (widget.formType == "PermissionForm")
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    _showPermissionBottomSheet();
+                  },
+                  child: Icon(Icons.edit),
+                ),
+                SizedBox(width: 16), // Add some space between buttons
+                FloatingActionButton(
+                  onPressed: () {
+                    // Add the functionality for the second button
+                  },
+                  child: Icon(Icons.download), // Replace with the desired icon
+                ),
+              ],
+            )
+          : FloatingActionButton(
+              onPressed: () {
+
+              },
+              child: Icon(Icons.download),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

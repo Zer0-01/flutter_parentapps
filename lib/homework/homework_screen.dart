@@ -8,22 +8,18 @@ class GetHomework extends StatefulWidget {
 
   GetHomework(this.className, this.parentId, {super.key});
 
-
-
   @override
   _GetHomeworkState createState() => _GetHomeworkState();
 }
 
 class _GetHomeworkState extends State<GetHomework> {
   @override
-  void initState(){
+  void initState() {
     super.initState();
     updateIsNewHomeworkField();
-
   }
 
   Future<void> updateIsNewHomeworkField() async {
-
     print(widget.className);
     // Get a reference to the documents in the 'Homework' collection
     QuerySnapshot homeworkDocs = await FirebaseFirestore.instance
@@ -51,7 +47,8 @@ class _GetHomeworkState extends State<GetHomework> {
     CollectionReference homeworkCollection =
         FirebaseFirestore.instance.collection('Homework');
 
-    Query homework = homeworkCollection.where('class', isEqualTo: widget.className);
+    Query homework =
+        homeworkCollection.where('class', isEqualTo: widget.className);
 
     return StreamBuilder<QuerySnapshot>(
       stream: homework.orderBy('dueDate', descending: true).snapshots(),
@@ -94,7 +91,7 @@ class _GetHomeworkState extends State<GetHomework> {
 
               if (due.isBefore(currentDate)) {
                 daysRemaining = 0;
-                colourStatus = Colors.white;
+                colourStatus = Colors.grey;
               } else {
                 final difference = due.difference(currentDate).inDays;
                 daysRemaining = difference;
@@ -104,7 +101,7 @@ class _GetHomeworkState extends State<GetHomework> {
                 } else if (difference <= 5) {
                   colourStatus = Colors.yellow.shade100;
                 } else {
-                  colourStatus = Colors.blue.shade100;
+                  colourStatus = Colors.white;
                 }
               }
 
@@ -119,60 +116,60 @@ class _GetHomeworkState extends State<GetHomework> {
                                 parentId: widget.parentId,
                               )));
                     },
-                    child: Container(
+                    style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colourStatus,
+                      backgroundColor: colourStatus,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Icon(
-                                Icons.category,
-                                // Replace with an appropriate icon
-                                color: Colors.black, // Set icon color to black
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              Icons.category,
+                              // Replace with an appropriate icon
+                              color: Colors.black, // Set icon color to black
+                            ),
+                            Text(
+                              "$daysRemaining days left",
+                              style: TextStyle(
+                                color: Colors.black,
+                                // Set text color to black
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                "$daysRemaining days left",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  // Set text color to black
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            subject!,
-                            style: TextStyle(
-                              color: Colors.black, // Set text color to black
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
                             ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          subject!,
+                          style: TextStyle(
+                            color: Colors.black, // Set text color to black
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            title!,
-                            style: TextStyle(
-                              color: Colors.black, // Set text color to black
-                              fontSize: 16,
-                            ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          title!,
+                          style: TextStyle(
+                            color: Colors.black, // Set text color to black
+                            fontSize: 16,
                           ),
-                          SizedBox(height: 8),
-                          Text(
-                            description!,
-                            style: TextStyle(
-                              color: Colors.black, // Set text color to black
-                              fontSize: 14,
-                            ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          description!,
+                          style: TextStyle(
+                            color: Colors.black, // Set text color to black
+                            fontSize: 14,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ));
             },

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:parentapps/login/signup_screen.dart';
@@ -41,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(2, 5),
+                    offset: const Offset(2, 5),
                   )
                 ]),
                 child: TextField(
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(2, 5),
+                    offset: const Offset(2, 5),
                   )
                 ]),
                 child: TextField(
@@ -101,48 +103,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () async {
-                  try {
-                    await auth.signInWithEmailAndPassword(
-                        email: '$_email@smk.com', password: _password);
-
-                    User? user = auth.currentUser;
-                    if (user != null) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const ChildrenScreen(),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    setState(() {
-                      _errorMessage = 'Invalid email or password';
-                    });
-                  }
+                  await signInWithEmailAndPassword();
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
                     onTap: () {
                       // TODO: Implement forgot password logic
-                      print('Forgot Password');
                     },
-                    child: Text(
+                    child: const Text(
                       'Lupa Password?',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
                   InkWell(
                     onTap: () {
-                      // TODO: Implement sign-up logic
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SignupScreen(),
-                      ));
-                      print('Sign Up Here');
+                      navigateToSignUpScreen();
                     },
-                    child: Text(
+                    child: const Text(
                       'Belum Mendaftar? Daftar Di Sini',
                       style: TextStyle(color: Colors.blue),
                     ),
@@ -154,5 +135,58 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // Function to handle sign in with email and password
+  Future<void> signInWithEmailAndPassword() async {
+    try {
+      await auth.signInWithEmailAndPassword(
+          email: '$_email@smk.com', password: _password);
+
+      User? user = auth.currentUser;
+
+      if (user != null) {
+        await saveFCMTokenToFirestore(_email);
+        // Navigate to the ChildrenScreen
+        navigateToChildrenScreen();
+      }
+    } catch (e) {
+      // Handle authentication error and update error message
+      setState(() {
+        _errorMessage = 'Invalid email or password';
+      });
+    }
+  }
+
+  // Function to navigate to the Sign Up screen
+  void navigateToSignUpScreen() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => SignupScreen(),
+    ));
+  }
+
+  // Function to navigate to the ChildrenScreen
+  void navigateToChildrenScreen() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const ChildrenScreen(),
+      ),
+    );
+  }
+
+  Future<void> saveFCMTokenToFirestore(String email) async {
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+    // Get the FCM token
+    String? fcmToken = await _firebaseMessaging.getToken();
+
+    // Save the FCM token to Firestore or wherever you want to store it
+    // For example, you can use FirebaseFirestore
+    if (fcmToken != null) {
+      await FirebaseFirestore.instance
+          .collection('Parents')
+          .doc(email)
+          .update({'fcmToken': fcmToken});
+    }
   }
 }

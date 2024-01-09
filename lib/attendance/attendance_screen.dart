@@ -24,6 +24,8 @@ class GetAttendance extends StatefulWidget {
 
 // Define the state for GetAttendance widget
 class _GetAttendanceState extends State<GetAttendance> {
+  DateTime? selectedMonth;
+
   @override
   void initState() {
     super.initState();
