@@ -55,16 +55,21 @@ exports.updateIsNewHomework = functions.firestore
 exports.sendNotificationAttendance = functions.firestore
   .document('Students/{studentId}/Attendance/{attendanceId}')
   .onCreate((snap, context) => {
-    // const newData = snap.data();
+    const attendanceData = snap.data();
 
     // Extract childrenId from the path
     const childrenId = context.params.studentId;
 
+    const time = attendanceData.time !== null ? attendanceData.time : 'N/A';
+    const status = attendanceData.status !== null ? attendanceData.status : 'N/A';
+
+    const attendanceStatus = status === true ? 'Attend' : 'Absent';
+
     // Create a notification payload
     const payload = {
       notification: {
-        title: 'New Attendance Upload',
-        body: `Document ID: ${context.params.attendanceId}`,
+        title: `New Attendance Upload for ${childrenId}`,
+        body: `${context.params.attendanceId} \n Time: ${time} \n Status: ${attendanceStatus}`,
         // Add more notification options as needed
       },
       // Add additional data if needed
