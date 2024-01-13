@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'attendance_statement.dart';
 
 // Define a Flutter StatefulWidget for getting attendance
 class GetAttendance extends StatefulWidget {
@@ -50,6 +51,15 @@ class _GetAttendanceState extends State<GetAttendance> {
         // Handle the error as needed
       }
     }
+  }
+
+  void navigateToNextPage(BuildContext context, Widget nextPage) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => nextPage,
+      ),
+    );
   }
 
   @override
@@ -170,11 +180,18 @@ class _GetAttendanceState extends State<GetAttendance> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              _showConfirmationDialog(context, attendanceDocId);
+                              //_showConfirmationDialog(context, attendanceDocId);
+                              navigateToNextPage(
+                                  context,
+                                  AttendanceStatement(
+                                    studentId: widget.studentId,
+                                    attendanceId: attendanceDocId,
+                                  ));
                             },
-                            child: (statement != null)
-                                ? const Icon(Icons.create_rounded)
-                                : const Icon((Icons.add)),
+                            child: Icon(Icons.create_rounded),
+                            // child: (statement != null)
+                            //     ? const Icon(Icons.create_rounded)
+                            //     : const Icon((Icons.add)),
                           ),
                         ),
                       ],

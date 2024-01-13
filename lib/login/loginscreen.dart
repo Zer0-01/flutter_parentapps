@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    hintText: 'Nombor Telefon',
+                    hintText: 'Phone Number',
                     prefixIcon: Icon(Icons.person),
                     border: InputBorder.none,
                     //errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: 'Kata Laluan',
+                    hintText: 'Password',
                     prefixIcon: const Icon(Icons.lock),
                     border: InputBorder.none,
                     errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: const Text(
-                  'Log Masuk',
+                  'Login',
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () async {
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // TODO: Implement forgot password logic
                     },
                     child: const Text(
-                      'Lupa Password?',
+                      'Forgot Password',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       navigateToSignUpScreen();
                     },
                     child: const Text(
-                      'Belum Mendaftar? Daftar Di Sini',
+                      'Not Registered Yet? Sign Up Here!!',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),

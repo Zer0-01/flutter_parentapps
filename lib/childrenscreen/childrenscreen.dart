@@ -46,7 +46,7 @@ class ChildrenScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Pilih anak anda:',
+                    'Choose your children:',
                     style: TextStyle(fontSize: 24),
                   ),
                   const SizedBox(height: 20),

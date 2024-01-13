@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'pdfviewer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -52,7 +53,8 @@ class _FileSelectionState extends State<FileSelection> {
   Future<void> listFiles() async {
     final collection =
         FirebaseFirestore.instance.collection(widget.collectionName);
-    final querySnapshot = await collection.get();
+    final querySnapshot =
+        await collection.orderBy('uploadedDate', descending: true).get();
 
     setState(() {
       permissions = querySnapshot.docs
@@ -144,6 +146,13 @@ class FileList extends StatelessWidget {
         final title = document['title'];
 
         final category = document['categories'];
+        final Timestamp uploadedDate = document['uploadedDate'];
+
+        final DateTime dateTime = uploadedDate.toDate();
+
+// Format the DateTime to a String
+        final String formattedDate =
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
 
         return Card(
           elevation: 2,
@@ -151,7 +160,15 @@ class FileList extends StatelessWidget {
           child: ListTile(
             title: Text(document['title']),
             // Replace 'fileName' with your Firestore field name
-            subtitle: Text(category),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(formattedDate),
+                Text(category),
+
+
+              ],
+            ),
 
             onTap: () {
               Navigator.push(

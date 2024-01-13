@@ -166,56 +166,120 @@ class MenuScreen extends StatelessWidget {
                           appBar: AppBar(
                             backgroundColor: Theme.of(context).primaryColor,
                             title: Text(extractName(name)),
-                            actions: [
-                              IconButton(
-                                icon: const Icon(Icons.logout),
-                                onPressed: () async {
-                                  // Show a confirmation dialog
-                                  bool confirmLogout = await showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Text('Confirm Logout'),
-                                        content: Text(
-                                            'Are you sure you want to logout?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(false); // Cancel logout
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(true); // Confirm logout
-                                            },
-                                            child: Text('Logout'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-
-                                  // If user confirms logout, sign out
-                                  if (confirmLogout == true) {
-                                    await _unsubscribeFromFCMTopics(
-                                        subscribedTopics);
-
-                                    await FirebaseAuth.instance.signOut();
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const LoginScreen()),
-                                      (Route<dynamic> route) =>
-                                          false, // Clear all previous routes
+                            // actions: [
+                            //   IconButton(
+                            //     icon: const Icon(Icons.logout),
+                            //     onPressed: () async {
+                            //       // Show a confirmation dialog
+                            //       bool confirmLogout = await showDialog(
+                            //         context: context,
+                            //         builder: (context) {
+                            //           return AlertDialog(
+                            //             title: Text('Confirm Logout'),
+                            //             content: Text(
+                            //                 'Are you sure you want to logout?'),
+                            //             actions: [
+                            //               TextButton(
+                            //                 onPressed: () {
+                            //                   Navigator.of(context)
+                            //                       .pop(false); // Cancel logout
+                            //                 },
+                            //                 child: Text('Cancel'),
+                            //               ),
+                            //               TextButton(
+                            //                 onPressed: () {
+                            //                   Navigator.of(context)
+                            //                       .pop(true); // Confirm logout
+                            //                 },
+                            //                 child: Text('Logout'),
+                            //               ),
+                            //             ],
+                            //           );
+                            //         },
+                            //       );
+                            //
+                            //       // If user confirms logout, sign out
+                            //       if (confirmLogout == true) {
+                            //         await _unsubscribeFromFCMTopics(
+                            //             subscribedTopics);
+                            //
+                            //         await FirebaseAuth.instance.signOut();
+                            //         Navigator.pushAndRemoveUntil(
+                            //           context,
+                            //           MaterialPageRoute(
+                            //               builder: (context) =>
+                            //                   const LoginScreen()),
+                            //           (Route<dynamic> route) =>
+                            //               false, // Clear all previous routes
+                            //         );
+                            //       }
+                            //     },
+                            //   ),
+                            // ],
+                          ),
+                          drawer: Drawer(
+                            child: ListView(
+                              padding: EdgeInsets.zero,
+                              children: <Widget>[
+                                DrawerHeader(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  child: Text('User Menu'),
+                                ),
+                                ListTile(
+                                  title: Text('Logout'),
+                                  leading: Icon(Icons.logout),
+                                  onTap: () async {
+                                    // Show a confirmation dialog
+                                    bool confirmLogout = await showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('Confirm Logout'),
+                                          content: Text(
+                                              'Are you sure you want to logout?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(
+                                                    false); // Cancel logout
+                                              },
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(
+                                                    true); // Confirm logout
+                                              },
+                                              child: Text('Logout'),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
-                                  }
-                                },
-                              ),
-                            ],
+
+                                    // If user confirms logout, sign out
+                                    if (confirmLogout == true) {
+                                      await _unsubscribeFromFCMTopics(
+                                          subscribedTopics);
+
+                                      await FirebaseAuth.instance.signOut();
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginScreen(),
+                                        ),
+                                        (Route<dynamic> route) =>
+                                            false, // Clear all previous routes
+                                      );
+                                    }
+                                  },
+                                ),
+                                // Add more ListTiles or widgets as needed for additional menu items
+                              ],
+                            ),
                           ),
                           body: Column(
                             children: [
@@ -265,7 +329,7 @@ class MenuScreen extends StatelessWidget {
                                     child: MainMenuCard(
                                       showBadge: newForm,
                                       colour: Colors.lightBlue.shade50,
-                                      title: 'Form',
+                                      title: 'Forms',
                                       icons: Icons.insert_drive_file,
                                       onpress: () {
                                         Navigator.of(context).push(
@@ -282,29 +346,6 @@ class MenuScreen extends StatelessWidget {
                                 ],
                               ),
                             ],
-                          ),
-                          bottomNavigationBar: BottomAppBar(
-                            color: Colors.white,
-                            // Set the background color of the bottom app bar
-                            shape: CircularNotchedRectangle(),
-                            // Notch in the bottom app bar for FAB
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.home),
-                                  onPressed: () {
-                                    // Handle Home button press
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.settings),
-                                  onPressed: () {
-                                    // Handle Settings button press
-                                  },
-                                ),
-                              ],
-                            ),
                           ),
                         );
                       });
