@@ -147,12 +147,25 @@ class _AttendanceStatementState extends State<AttendanceStatement> {
             attendanceSnapshot.data() as Map<String, dynamic>;
         Timestamp? timestampDate = attendanceData['date'] ?? 'N/A';
         String? date = timestampDate != null
-            ? DateFormat('yyyy-MM-dd').format(timestampDate.toDate())
+            ? DateFormat('dd MMM y').format(timestampDate.toDate())
             : 'N/A/';
         String? fileName = attendanceData['fileName'] ?? 'N/A';
         String? fileURL = attendanceData['fileURl'] ?? 'N/A';
         String? statement = attendanceData['statement'] ?? 'N/A';
         String? time = attendanceData['time'] ?? 'N/A';
+        String? formattedTime;
+        if (time != null) {
+          try {
+            // Parse the raw time string
+            DateTime parsedTime = DateFormat.Hms().parse(time);
+
+            // Format the time in "hh:mm am/pm" format
+            formattedTime = DateFormat('hh:mm a').format(parsedTime);
+          } catch (e) {
+            print('Error parsing or formatting time: $e');
+            formattedTime = null;
+          }
+        }
         bool? status = attendanceData['status'];
 
         statementController = TextEditingController(text: statement);
@@ -165,23 +178,13 @@ class _AttendanceStatementState extends State<AttendanceStatement> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.all(16.0),
-                  color: Colors.blue,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Date: $date',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Time: $time',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
+                ListTile(
+                  title: Text('Date'),
+                  subtitle: Text(date),
+                ),
+                ListTile(
+                  title: Text('Time'),
+                  subtitle: Text(formattedTime!),
                 ),
                 ListTile(
                   title: Text('Status'),

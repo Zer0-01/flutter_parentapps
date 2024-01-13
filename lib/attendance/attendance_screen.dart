@@ -156,6 +156,21 @@ class _GetAttendanceState extends State<GetAttendance> {
                 DateTime? toDate = date?.toDate();
                 String formattedDate = DateFormat('dd MMM y').format(toDate!);
 
+                String? formattedTime;
+
+                if (time != null) {
+                  try {
+                    // Parse the raw time string
+                    DateTime parsedTime = DateFormat.Hms().parse(time);
+
+                    // Format the time in "hh:mm am/pm" format
+                    formattedTime = DateFormat('hh:mm a').format(parsedTime);
+                  } catch (e) {
+                    print('Error parsing or formatting time: $e');
+                    formattedTime = null;
+                  }
+                }
+
                 return Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey), // Set border color
@@ -166,7 +181,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                     title: Row(
                       children: [
                         Expanded(
-                          child: Text("$formattedDate ($time)"),
+                          child: Text("$formattedDate ($formattedTime)"),
                         ),
                         Expanded(
                           child: Container(
@@ -229,6 +244,9 @@ class _GetAttendanceState extends State<GetAttendance> {
     String? statement = data['statement'] as String?;
     bool? status = data['status'] as bool?;
     String? time = data['time'] as String?;
+    String? formattedTime;
+
+
 
     DateTime? toDate = date?.toDate();
     String formattedDate = DateFormat('dd MMM y').format(toDate!);
