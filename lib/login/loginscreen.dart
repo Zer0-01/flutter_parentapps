@@ -146,9 +146,9 @@ class _LoginScreenState extends State<LoginScreen> {
       User? user = auth.currentUser;
 
       if (user != null) {
-        await saveFCMTokenToFirestore(_email);
+        List<String> subscribedTopics = await saveFCMTokenToFirestore(_email);
         // Navigate to the ChildrenScreen
-        navigateToChildrenScreen();
+        navigateToChildrenScreen(subscribedTopics);
       }
     } catch (e) {
       // Handle authentication error and update error message
@@ -158,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> saveFCMTokenToFirestore(String email) async {
+  Future<List<String>> saveFCMTokenToFirestore(String email) async {
     FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
     // Get the FCM token
@@ -190,24 +190,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
           print('Children Id: $childrenId');
 
-          String topic = 'NotificationAttendance_$childrenId';
+          CollectionReference studentsCollection =
+              FirebaseFirestore.instance.collection('Students');
+          DocumentReference studentDocument =
+              studentsCollection.doc(childrenId);
 
-          await FirebaseMessaging.instance.subscribeToTopic(topic);
-          print('Subscribed to topic: $topic');
+          DocumentSnapshot studentSnapshot = await studentDocument.get();
+
+          Map<String, dynamic> studentData =
+              studentSnapshot.data() as Map<String, dynamic>;
+
+          String classId = studentData['classID'];
+
+          List<String> topicsToSubscribe = [];
+
+          String topicAttendance = 'NotificationAttendance_$childrenId';
+          String topicHomework =
+              'NotificationHomework_${classId.replaceAll(' ', '_')}';
+
+          String topicAnnouncementForm = 'NotificationAnnouncementForm';
+
+          topicsToSubscribe.add(topicAttendance);
+          topicsToSubscribe.add(topicHomework);
+          topicsToSubscribe.add(topicAnnouncementForm);
+
+          for (String topic in topicsToSubscribe) {
+            await FirebaseMessaging.instance.subscribeToTopic(topic);
+            print('Subscribe to topic: $topic');
+          }
+
+          // Return the list of topicsToSubscribe
+          return topicsToSubscribe;
         } else {
           print('Document does not exist');
+          // Return an empty list if the document doesn't exist
+          return [];
         }
       } catch (e) {
         print('Error getting document: $e');
+        // Return an empty list in case of an error
+        return [];
       }
     }
+
+    // Return an empty list if fcmToken is null
+    return [];
   }
 
   // Function to navigate to the ChildrenScreen
-  void navigateToChildrenScreen() {
+  void navigateToChildrenScreen(List<String> subscribedTopics) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const ChildrenScreen(),
+        builder: (context) =>
+            ChildrenScreen(topicsToSubcribe: subscribedTopics),
       ),
     );
   }

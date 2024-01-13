@@ -92,3 +92,88 @@ exports.sendNotificationAttendance = functions.firestore
         return null;
       });
   });
+
+exports.sendNotificationHomework = functions.firestore
+  .document('Homework/{homeworkId}')
+  .onCreate((snap, context) => {
+    const homeworkData = snap.data();
+
+    // Extract class, title, and subject from the homework data
+    const homeworkClass = homeworkData.class !== null ? homeworkData.class : 'N/A';
+    const homeworkTitle = homeworkData.title !== null ? homeworkData.title : 'N/A';
+    const homeworkSubject = homeworkData.subject !== null ? homeworkData.subject : 'N/A';
+
+    const homeworkClassWithoutSpace = homeworkClass.replace(/ /g, "_");
+
+    // Create a notification payload for new homework upload
+    const payload = {
+      notification: {
+        title: `New Homework Upload for ${homeworkClass}`,
+        body: `Title: ${homeworkTitle}\nSubject: ${homeworkSubject}\nHomework ID: ${context.params.homeworkId}`,
+        // Add more notification options as needed
+      },
+      // Add additional data if needed
+      data: {
+        // Add custom data here
+      },
+    };
+
+    // Dynamically create the topic based on homework class
+    const topic = `NotificationHomework_${homeworkClassWithoutSpace}`;
+
+    // Send the notification to the dynamically created topic
+    return admin.messaging().sendToTopic(topic, payload)
+      .then((response) => {
+        console.log('Notification sent successfully:', response, topic);
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error sending notification:', error);
+        return null;
+      });
+  });
+
+exports.sendNotificationAnnouncementForms = functions.firestore
+  .document('Forms/{formId}')
+  .onCreate((snap, context) => {
+    const formData = snap.data();
+
+    // Extract class, title, and subject from the homework data
+    // const formCategories = formData.categories !== null ? formData.categories : 'N/A';
+    // const formFileName = formData.fileName !== null ? formData.fileName : 'N/A';
+    const formFormType = formData.formType !== null ? formData.formType : 'N/A';
+    const formTitle = formData.title !== null ? formData.title : 'N/A';
+
+    // Check if formCategories is equal to "Announcement"
+        if (formFormType !== 'Announcement') {
+          console.log('Form is not an Announcement. Exiting function.');
+          return null;
+        }
+
+    // Create a notification payload for new homework upload
+    const payload = {
+      notification: {
+        title: `New Announcement Form`,
+        body: `Title: ${formTitle}`,
+        // Add more notification options as needed
+      },
+      // Add additional data if needed
+      data: {
+        // Add custom data here
+      },
+    };
+
+    // Dynamically create the topic based on homework class
+    const topic = `NotificationAnnouncementForm`;
+
+    // Send the notification to the dynamically created topic
+    return admin.messaging().sendToTopic(topic, payload)
+      .then((response) => {
+        console.log('Notification sent successfully:', response, topic);
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error sending notification:', error);
+        return null;
+      });
+  });

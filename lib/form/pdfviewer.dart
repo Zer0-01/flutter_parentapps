@@ -110,7 +110,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Radio(
-                        value: "Ya",
+                        value: "Yes",
                         groupValue: permissionStatus,
                         onChanged: (value) {
                           setState(() {
@@ -118,9 +118,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                           });
                         },
                       ),
-                      Text('Ya'),
+                      Text('Yes'),
                       Radio(
-                        value: "Tidak",
+                        value: "No",
                         groupValue: permissionStatus,
                         onChanged: (value) {
                           setState(() {
@@ -128,7 +128,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                           });
                         },
                       ),
-                      Text('Tidak'),
+                      Text('No'),
                     ],
                   ),
                   ElevatedButton(
@@ -138,7 +138,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                       createNewDoc(); // Call the function to create a new document
                       Navigator.of(context).pop();
                     },
-                    child: Text('Simpan'),
+                    child: Text('Save'),
                   ),
                 ],
               ),

@@ -21,6 +21,8 @@ Future<void> main() async {
     ignoreSsl: true,
   );
 
+  List<String> subscribedTopics = [];
+
   User? user = FirebaseAuth.instance.currentUser;
   if (user != null) {
     String? phoneNumber = user!.email;
@@ -32,13 +34,13 @@ Future<void> main() async {
     print('Phone Number: $phoneNumber');
     print('Parent Id: $parentId');
 
-    await saveFCMTokenToFirestore(parentId!);
+    subscribedTopics = await saveFCMTokenToFirestore(parentId!);
   }
 
-  runApp(MyApp(user));
+  runApp(MyApp(user, subscribedTopics));
 }
 
-Future<void> saveFCMTokenToFirestore(String email) async {
+Future<List<String>> saveFCMTokenToFirestore(String email) async {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
   // Get the FCM token
@@ -53,7 +55,7 @@ Future<void> saveFCMTokenToFirestore(String email) async {
         .update({'fcmToken': fcmToken});
 
     CollectionReference parentCollection =
-    FirebaseFirestore.instance.collection('Parents');
+        FirebaseFirestore.instance.collection('Parents');
     DocumentReference parentDocument = parentCollection.doc(email);
 
     try {
@@ -64,32 +66,65 @@ Future<void> saveFCMTokenToFirestore(String email) async {
       if (documentSnapshot.exists) {
         // Access the data using the data() method
         Map<String, dynamic> data =
-        documentSnapshot.data() as Map<String, dynamic>;
+            documentSnapshot.data() as Map<String, dynamic>;
 
         String? childrenId = data['childrenId'];
 
         print('Children Id: $childrenId');
 
-        String topic = 'NotificationAttendance_$childrenId';
+        CollectionReference studentsCollection =
+            FirebaseFirestore.instance.collection('Students');
+        DocumentReference studentDocument = studentsCollection.doc(childrenId);
 
-        await FirebaseMessaging.instance.subscribeToTopic(topic);
-        print('Subscribed to topic: $topic');
+        DocumentSnapshot studentSnapshot = await studentDocument.get();
+
+        Map<String, dynamic> studentData =
+            studentSnapshot.data() as Map<String, dynamic>;
+
+        String classId = studentData['classID'];
+
+        List<String> topicsToSubscribe = [];
+
+        String topicAttendance = 'NotificationAttendance_$childrenId';
+        String topicHomework =
+            'NotificationHomework_${classId.replaceAll(' ', '_')}';
+
+        String topicAnnouncementForm = 'NotificationAnnouncementForm';
+
+
+        topicsToSubscribe.add(topicAttendance);
+        topicsToSubscribe.add(topicHomework);
+        topicsToSubscribe.add(topicAnnouncementForm);
+
+
+        for (String topic in topicsToSubscribe) {
+          await FirebaseMessaging.instance.subscribeToTopic(topic);
+          print('Subscribe to topic: $topic');
+        }
+
+        // Return the list of topicsToSubscribe
+        return topicsToSubscribe;
       } else {
         print('Document does not exist');
+        // Return an empty list if the document doesn't exist
+        return [];
       }
     } catch (e) {
       print('Error getting document: $e');
+      // Return an empty list in case of an error
+      return [];
     }
   }
-}
 
+  // Return an empty list if fcmToken is null
+  return [];
+}
 
 class MyApp extends StatelessWidget {
   final User? user;
+  final List<String> subscribedTopics;
 
-  const MyApp(this.user, {super.key});
-
-
+  const MyApp(this.user, this.subscribedTopics, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +144,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: user != null ? const ChildrenScreen() : const LoginScreen(),
+      home: user != null
+          ? ChildrenScreen(
+              topicsToSubcribe: subscribedTopics,
+            )
+          : const LoginScreen(),
     );
   }
 }

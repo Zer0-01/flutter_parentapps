@@ -10,10 +10,14 @@ class homeworkDetails extends StatefulWidget {
   homeworkDetails({this.homeworkId, this.parentId});
 
   _homeworkDetailsState createState() => _homeworkDetailsState();
+
+
 }
 
 class _homeworkDetailsState extends State<homeworkDetails> {
   TextEditingController commentController = TextEditingController();
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +152,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                               DateTime currentTime = DateTime.now();
                               // Save the new comment to the "Comment" subcollection
                               homeworkDoc.collection('Comment').add({
-                                'parentName': parentName,
+                                'userName': parentName,
                                 'message': newComment,
                                 'time': currentTime,
                               });
@@ -191,8 +195,8 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                                 in commentSnapshot.data!.docs) {
                               Map<String, dynamic> commentData =
                                   commentDoc.data() as Map<String, dynamic>;
-                              String parentName =
-                                  commentData['parentName'] as String;
+                              String userName =
+                                  commentData['userName'] as String;
                               String message = commentData['message'] as String;
                               Timestamp? time =
                                   commentData['time'] as Timestamp?;
@@ -209,7 +213,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                                     Row(
                                       children: [
                                         Text(
-                                          parentName,
+                                          userName,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),

@@ -4,10 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:parentapps/menuscreen/menu_screen.dart';
 
 class ChildrenScreen extends StatelessWidget {
-  const ChildrenScreen({super.key});
+  final List<String> topicsToSubcribe;
+
+
+  const ChildrenScreen({required this.topicsToSubcribe, super.key});
+
+
 
   @override
   Widget build(BuildContext context) {
+
+    print('Subsribed topic: $topicsToSubcribe');
     // TODO: implement build
     String? email = FirebaseAuth.instance.currentUser?.email;
     String? ic = email?.substring(0, email.indexOf("@"));
@@ -60,7 +67,8 @@ class ChildrenScreen extends StatelessWidget {
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => MenuScreen(
                                     childrenName: childrenName,
-                                    childrenId: childrenId),
+                                    childrenId: childrenId,
+                                    subscribedTopics: topicsToSubcribe),
                               ));
                               // Handle button press for the specific child
                               // For example, navigate to a new screen or perform an action

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:parentapps/attendance/attendance_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,12 +21,18 @@ String extractName(String fullName) {
 class MenuScreen extends StatelessWidget {
   final String childrenName;
   final String? childrenId;
+  final List<String> subscribedTopics;
 
   const MenuScreen(
-      {super.key, required this.childrenName, required this.childrenId});
+      {super.key,
+      required this.childrenName,
+      required this.childrenId,
+      required this.subscribedTopics});
 
   @override
   Widget build(BuildContext context) {
+    print('Subsribed topic: $subscribedTopics');
+
     CollectionReference studentCollection =
         FirebaseFirestore.instance.collection("Students");
     Query children = studentCollection.where("name", isEqualTo: childrenName);
@@ -193,6 +200,9 @@ class MenuScreen extends StatelessWidget {
 
                                   // If user confirms logout, sign out
                                   if (confirmLogout == true) {
+                                    await _unsubscribeFromFCMTopics(
+                                        subscribedTopics);
+
                                     await FirebaseAuth.instance.signOut();
                                     Navigator.pushAndRemoveUntil(
                                       context,
@@ -303,6 +313,14 @@ class MenuScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _unsubscribeFromFCMTopics(
+      List<String> topicsToUnsubscribe) async {
+    for (String topic in topicsToUnsubscribe) {
+      await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+      print('Unsubscribed from FCM topic: $topic');
+    }
   }
 }
 
