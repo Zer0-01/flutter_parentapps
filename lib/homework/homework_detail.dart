@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:parentapps/homework/homework_file.dart';
 
 // ignore: must_be_immutable
@@ -10,14 +12,10 @@ class homeworkDetails extends StatefulWidget {
   homeworkDetails({this.homeworkId, this.parentId});
 
   _homeworkDetailsState createState() => _homeworkDetailsState();
-
-
 }
 
 class _homeworkDetailsState extends State<homeworkDetails> {
   TextEditingController commentController = TextEditingController();
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +47,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
         String? description = data['description'] as String?;
         String? downloadURL = data['downloadURL'] as String?;
         Timestamp? dueDate = data['dueDate'] as Timestamp?;
-        String? subject = data['subject'] as String?;
+        String subject = data['subject'] as String;
         String? teacherId = data['teacherId'] as String?;
         String? title = data['title'] as String?;
 
@@ -79,9 +77,10 @@ class _homeworkDetailsState extends State<homeworkDetails> {
               String parentId = parentDocSnapshot.id;
 
               return Scaffold(
-                backgroundColor: Colors.grey.shade300,
+                backgroundColor: Colors.white,
                 appBar: AppBar(
                   title: Text(homeworkId),
+                  backgroundColor: Colors.cyan,
                 ),
                 body: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -106,34 +105,51 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                           style: TextStyle(fontSize: 16),
                         ),
                         Text(
-                          'Due Date: ${dueDate?.toDate() ?? ''}',
+                          'Due Date: ${dueDate != null ? DateFormat('yyyy-MM-dd').format(dueDate!.toDate()) : ''}',
                           style: TextStyle(fontSize: 16),
                         ),
                         SizedBox(height: 20),
-                        Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                10.0), // Adjust the value for the desired border radius
+                          ),
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'Description:',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                description ?? 'No description available.',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 20),
+                              Visibility(
+                                visible: downloadURL != null,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                      builder: (context) => homeworkFile(
+                                          homeworkId, title!, downloadURL!),
+                                    ));
+                                  },
+                                  child: Text('View Attach File'),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          description ?? 'No description available.',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 20),
-                        Visibility(
-                          visible: downloadURL != null,
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => homeworkFile(
-                                    homeworkId, title!, downloadURL!),
-                              ));
-                            },
-                            icon: Icon(Icons.file_present_rounded),
-                          ),
-                        ),
+
                         SizedBox(
                           height: 10,
                         ),
@@ -141,6 +157,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                           controller: commentController,
                           decoration: InputDecoration(
                             hintText: 'Enter your comment',
+                            border: OutlineInputBorder(),
                           ),
                         ),
 
@@ -156,6 +173,14 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                                 'message': newComment,
                                 'time': currentTime,
                               });
+
+                              Fluttertoast.showToast(
+                                msg: 'Comment Sent successfully',
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                backgroundColor: Colors.green,
+                                textColor: Colors.white,
+                              );
 
                               print(currentTime);
 
@@ -207,22 +232,21 @@ class _homeworkDetailsState extends State<homeworkDetails> {
 
                               commentWidgets.add(
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          userName,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 20,
-                                        ),
-                                        Text(stringTime),
-                                      ],
+                                    Text(
+                                      userName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      stringTime,
+                                      style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                     ),
                                     Text(message),
                                   ],
@@ -230,9 +254,20 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                               );
                             }
 
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: commentWidgets,
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    10.0), // Adjust the value for the desired border radius
+                              ),
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: commentWidgets,
+                              ),
                             );
                           },
                         ),

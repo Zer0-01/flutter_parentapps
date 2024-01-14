@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'homework_detail.dart';
 
 class GetHomework extends StatefulWidget {
@@ -68,6 +69,7 @@ class _GetHomeworkState extends State<GetHomework> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('HOMEWORK'),
+            backgroundColor: Colors.cyan,
           ),
           body: ListView.builder(
             itemCount: snapshot.data!.docs.length,
@@ -87,7 +89,13 @@ class _GetHomeworkState extends State<GetHomework> {
               DateTime currentDate = DateTime.now();
               int daysRemaining;
               DateTime due = dueDate!.toDate();
+              String? formattedDate;
               Color colourStatus;
+
+              if (due != null) {
+                // Format the date without the time
+                formattedDate = DateFormat('yyyy-MM-dd').format(due);
+              }
 
               if (due.isBefore(currentDate)) {
                 daysRemaining = 0;
@@ -129,10 +137,13 @@ class _GetHomeworkState extends State<GetHomework> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.category,
-                              // Replace with an appropriate icon
-                              color: Colors.black, // Set icon color to black
+                            Text(
+                              subject!,
+                              style: TextStyle(
+                                color: Colors.black, // Set text color to black
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                             ),
                             Text(
                               "$daysRemaining days left",
@@ -145,22 +156,27 @@ class _GetHomeworkState extends State<GetHomework> {
                           ],
                         ),
                         SizedBox(height: 8),
-                        Text(
-                          subject!,
-                          style: TextStyle(
-                            color: Colors.black, // Set text color to black
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              title!,
+                              style: TextStyle(
+                                color: Colors.black, // Set text color to black
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              "Due Date: $formattedDate",
+                              style: TextStyle(
+                                color: Colors.black,
+                                // Set text color to black
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 4),
-                        Text(
-                          title!,
-                          style: TextStyle(
-                            color: Colors.black, // Set text color to black
-                            fontSize: 16,
-                          ),
-                        ),
                         SizedBox(height: 8),
                         Text(
                           description!,
