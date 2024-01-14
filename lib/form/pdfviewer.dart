@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String fileUrl;
@@ -88,6 +89,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
       await documentReference.update(
           documentData); // Use set instead of add to update the document
+
+      Fluttertoast.showToast(
+        msg: 'Permission Data saved successfully',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
       print('Document Successfully Updated');
     } catch (e) {
       print('Error updating document');
@@ -105,7 +114,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Text('Anda memberi kebenaran:'),
+                  Text('Give Permission?'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -152,7 +161,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('PDF Viewer')),
+      appBar: AppBar(backgroundColor: Colors.cyan, title: Text(widget.title)),
       body: Center(
         child: isLoading
             ? CircularProgressIndicator()
@@ -180,9 +189,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               ],
             )
           : FloatingActionButton(
-              onPressed: () {
-
-              },
+              onPressed: () {},
               child: Icon(Icons.download),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

@@ -109,7 +109,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                       children: [
                         Expanded(
                           child: Text(
-                            "Tarikh",
+                            "Date",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -117,7 +117,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                           child: Align(
                             alignment: Alignment.center,
                             child: Text(
-                              "Kehadiran",
+                              "Status",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -126,7 +126,7 @@ class _GetAttendanceState extends State<GetAttendance> {
                           child: Align(
                             alignment: Alignment.center,
                             child: Text(
-                              "Catatan",
+                              "Remark",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),

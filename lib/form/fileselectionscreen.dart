@@ -80,46 +80,58 @@ class _FileSelectionState extends State<FileSelection> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.collectionName),
+          backgroundColor: Colors.cyan,
+          title: Text('FORMS'),
           bottom: TabBar(
             tabs: [
-              Tab(text: 'Kebenaran'),
-              Tab(text: 'Pengumuman'),
+              Tab(text: 'Permission'),
+              Tab(text: 'Announcement'),
             ],
           ),
         ),
-        body: Column(
-          children: [
-            // Dropdown for category selection
-            DropdownButton<String>(
-              value: selectedCategory,
-              hint: Text('Filter by Category'),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedCategory = newValue!;
-                  listFiles();
-                });
-              },
-              items: <String>['', 'Kokurikulum', 'Kurikulum', 'HEM']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            Expanded(
-              child: TabBarView(
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              // Dropdown for category selection
+              Row(
                 children: [
-                  FileList(files: permissions, childrenId: widget.childrenId),
-                  FileList(
-                    files: announcements,
-                    childrenId: widget.childrenId,
+                  Text('Filter:'),
+                  SizedBox(
+                    width: 14,
+                  ),
+                  DropdownButton<String>(
+                    value: selectedCategory,
+                    hint: Text('Filter by Category'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedCategory = newValue!;
+                        listFiles();
+                      });
+                    },
+                    items: <String>['', 'Kokurikulum', 'Kurikulum', 'HEM']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    FileList(files: permissions, childrenId: widget.childrenId),
+                    FileList(
+                      files: announcements,
+                      childrenId: widget.childrenId,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -151,8 +163,7 @@ class FileList extends StatelessWidget {
         final DateTime dateTime = uploadedDate.toDate();
 
 // Format the DateTime to a String
-        final String formattedDate =
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+        final String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
 
         return Card(
           elevation: 2,
@@ -165,8 +176,6 @@ class FileList extends StatelessWidget {
               children: [
                 Text(formattedDate),
                 Text(category),
-
-
               ],
             ),
 
