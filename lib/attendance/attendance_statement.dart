@@ -172,48 +172,63 @@ class _AttendanceStatementState extends State<AttendanceStatement> {
 
         return Scaffold(
           appBar: AppBar(
+            backgroundColor: Colors.cyan,
             title: Text('Attendance Details'),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  title: Text('Date'),
-                  subtitle: Text(date),
-                ),
-                ListTile(
-                  title: Text('Time'),
-                  subtitle: Text(formattedTime!),
-                ),
-                ListTile(
-                  title: Text('Status'),
-                  subtitle: Text(
-                      status != null ? (status ? 'Present' : 'Absent') : 'N/A'),
-                ),
-                ListTile(
-                  title: Text('Statement'),
-                  subtitle: TextField(
-                    controller: statementController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter statement',
-                      border: OutlineInputBorder(),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text('Date'),
+                    subtitle: Text(date),
+                  ),
+                  ListTile(
+                    title: Text('Time'),
+                    subtitle: Text(formattedTime!),
+                  ),
+                  ListTile(
+                    title: Text('Status'),
+                    subtitle: Text(status != null
+                        ? (status ? 'Present' : 'Absent')
+                        : 'N/A'),
+                  ),
+                  ListTile(
+                    title: Text('Statement'),
+                    subtitle: TextField(
+                      controller: statementController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter statement',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                ),
-                ListTile(
-                  title: Text('File Name'),
-                  subtitle: Text(selectedFileName ?? fileName!),
-                ),
-                ElevatedButton(
-                  onPressed: pickFile,
-                  child: Text('Pick PDF File'),
-                ),
-                ElevatedButton(
-                  onPressed: saveData,
-                  child: Text('Save'),
-                ),
-              ],
+                  ListTile(
+                    title: Text('Supporting Document'),
+                    subtitle: Text(selectedFileName ?? fileName!),
+                  ),
+                  ElevatedButton(
+                    onPressed: pickFile,
+                    child: Text('Pick Document (Only .pdf format)'),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ElevatedButton(
+                      onPressed: saveData,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.green, // Set the background color to green
+                      ),
+                      child: Text('Save'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

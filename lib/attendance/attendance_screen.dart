@@ -93,6 +93,7 @@ class _GetAttendanceState extends State<GetAttendance> {
         // Build the attendance list UI
         return Scaffold(
           appBar: AppBar(
+            backgroundColor: Colors.cyan,
             title: const Text("ATTENDANCE"),
           ),
           body: Padding(
