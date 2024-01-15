@@ -179,19 +179,18 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                   },
                   child: Icon(Icons.edit),
                 ),
-                SizedBox(width: 16), // Add some space between buttons
-                FloatingActionButton(
-                  onPressed: () {
-                    // Add the functionality for the second button
-                  },
-                  child: Icon(Icons.download), // Replace with the desired icon
-                ),
+                SizedBox(width: 16),
+                // Add some space between buttons
+                // FloatingActionButton(
+                //   onPressed: () {
+                //     // Add the functionality for the second button
+                //   },
+                //   child: Icon(Icons.download), // Replace with the desired icon
+                // ),
               ],
             )
-          : FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.download),
-            ),
+          : SizedBox(width: 16), // Add some space between buttons
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

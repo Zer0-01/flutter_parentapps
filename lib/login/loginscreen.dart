@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Image.asset(
-                "assets/Logo.png",
+                "assets/logo2.png",
                 width: 150,
                 height: 150,
               ),
@@ -110,15 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      // TODO: Implement forgot password logic
-                    },
-                    child: const Text(
-                      'Forgot Password',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
                   InkWell(
                     onTap: () {
                       navigateToSignUpScreen();

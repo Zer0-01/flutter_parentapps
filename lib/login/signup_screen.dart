@@ -8,6 +8,8 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupState extends State<SignupScreen> {
+  TextEditingController fullNameController = TextEditingController();
+
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -39,6 +41,7 @@ class _SignupState extends State<SignupScreen> {
 
         return Scaffold(
           appBar: AppBar(
+            backgroundColor: Colors.cyan,
             title: Text('Sign Up'),
           ),
           body: Padding(
@@ -57,10 +60,37 @@ class _SignupState extends State<SignupScreen> {
                       )
                     ]),
                     child: TextFormField(
+                      controller: fullNameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        labelText: 'Full Name (In Capital Letter)',
+                        prefixIcon: Icon(Icons.person), // Add person icon
+                        border: InputBorder.none,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your full name';
+                        }
+                        // You can add more validation if needed
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(2, 5),
+                      )
+                    ]),
+                    child: TextFormField(
                       controller: phoneNumberController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        labelText: 'Nombor Telefon',
+                        labelText: 'Phone Number',
                         prefixIcon: Icon(Icons.phone), // Add phone icon
                         border: InputBorder.none,
                       ),
@@ -87,7 +117,7 @@ class _SignupState extends State<SignupScreen> {
                       controller: passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: 'Kata Laluan',
+                        labelText: 'Password',
                         prefixIcon: Icon(Icons.lock), // Add lock icon
                         border: InputBorder.none,
                       ),
@@ -106,7 +136,8 @@ class _SignupState extends State<SignupScreen> {
                       _onSignUpButtonPressed(documentIds);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor, // Customize button color
+                      backgroundColor: Theme.of(context)
+                          .primaryColor, // Customize button color
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             10.0), // Customize button shape
@@ -115,7 +146,7 @@ class _SignupState extends State<SignupScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        'Daftar',
+                        'Sign Up',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
@@ -143,14 +174,18 @@ class _SignupState extends State<SignupScreen> {
           password: passwordController.text,
         );
 
+        await FirebaseFirestore.instance.collection('Parents').doc(enteredPhoneNumber).update(
+            {'name': fullNameController.text});
+
+
         // TODO: Add additional logic if user creation is successful
 
         print('User created successfully');
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Berjaya Mendaftar'),
-            content: Text("Pendaftaran anda berjaya"),
+            title: Text('Successfully Registered'),
+            content: Text("Your registration is successful"),
             actions: [
               TextButton(
                 onPressed: () {
