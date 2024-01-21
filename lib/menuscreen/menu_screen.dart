@@ -37,11 +37,6 @@ class MenuScreen extends StatelessWidget {
         FirebaseFirestore.instance.collection("Students");
     Query children = studentCollection.where("name", isEqualTo: childrenName);
 
-    CollectionReference attendanceCollection = FirebaseFirestore.instance
-        .collection("Students")
-        .doc(childrenId)
-        .collection("Attendance");
-
     return StreamBuilder<QuerySnapshot>(
       stream: children.snapshots(),
       builder: (context, snapshot) {
@@ -166,56 +161,6 @@ class MenuScreen extends StatelessWidget {
                           appBar: AppBar(
                             backgroundColor: Theme.of(context).primaryColor,
                             title: Text(extractName(name)),
-                            // actions: [
-                            //   IconButton(
-                            //     icon: const Icon(Icons.logout),
-                            //     onPressed: () async {
-                            //       // Show a confirmation dialog
-                            //       bool confirmLogout = await showDialog(
-                            //         context: context,
-                            //         builder: (context) {
-                            //           return AlertDialog(
-                            //             title: Text('Confirm Logout'),
-                            //             content: Text(
-                            //                 'Are you sure you want to logout?'),
-                            //             actions: [
-                            //               TextButton(
-                            //                 onPressed: () {
-                            //                   Navigator.of(context)
-                            //                       .pop(false); // Cancel logout
-                            //                 },
-                            //                 child: Text('Cancel'),
-                            //               ),
-                            //               TextButton(
-                            //                 onPressed: () {
-                            //                   Navigator.of(context)
-                            //                       .pop(true); // Confirm logout
-                            //                 },
-                            //                 child: Text('Logout'),
-                            //               ),
-                            //             ],
-                            //           );
-                            //         },
-                            //       );
-                            //
-                            //       // If user confirms logout, sign out
-                            //       if (confirmLogout == true) {
-                            //         await _unsubscribeFromFCMTopics(
-                            //             subscribedTopics);
-                            //
-                            //         await FirebaseAuth.instance.signOut();
-                            //         Navigator.pushAndRemoveUntil(
-                            //           context,
-                            //           MaterialPageRoute(
-                            //               builder: (context) =>
-                            //                   const LoginScreen()),
-                            //           (Route<dynamic> route) =>
-                            //               false, // Clear all previous routes
-                            //         );
-                            //       }
-                            //     },
-                            //   ),
-                            // ],
                           ),
                           drawer: Drawer(
                             child: ListView(

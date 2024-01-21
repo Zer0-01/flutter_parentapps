@@ -47,8 +47,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
         String? description = data['description'] as String?;
         String? downloadURL = data['downloadURL'] as String?;
         Timestamp? dueDate = data['dueDate'] as Timestamp?;
-        String subject = data['subject'] as String;
-        String? teacherId = data['teacherId'] as String?;
+        String? subject = data['subject'] as String?;
         String? title = data['title'] as String?;
 
         CollectionReference parentCollection =
@@ -74,7 +73,6 @@ class _homeworkDetailsState extends State<homeworkDetails> {
               Map<String, dynamic> parentData =
                   parentDocSnapshot.data() as Map<String, dynamic>;
               String parentName = parentData['name'] as String;
-              String parentId = parentDocSnapshot.id;
 
               return Scaffold(
                 backgroundColor: Colors.white,
@@ -105,7 +103,7 @@ class _homeworkDetailsState extends State<homeworkDetails> {
                           style: TextStyle(fontSize: 16),
                         ),
                         Text(
-                          'Due Date: ${dueDate != null ? DateFormat('yyyy-MM-dd').format(dueDate!.toDate()) : ''}',
+                          'Due Date: ${dueDate != null ? DateFormat('yyyy-MM-dd').format(dueDate.toDate()) : ''}',
                           style: TextStyle(fontSize: 16),
                         ),
                         SizedBox(height: 20),

@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:parentapps/childrenscreen/childrenscreen.dart';
 import 'package:parentapps/login/loginscreen.dart';
-import 'FCM_service.dart';
 import 'firebase_options.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -91,11 +89,9 @@ Future<List<String>> saveFCMTokenToFirestore(String email) async {
 
         String topicAnnouncementForm = 'NotificationAnnouncementForm';
 
-
         topicsToSubscribe.add(topicAttendance);
         topicsToSubscribe.add(topicHomework);
         topicsToSubscribe.add(topicAnnouncementForm);
-
 
         for (String topic in topicsToSubscribe) {
           await FirebaseMessaging.instance.subscribeToTopic(topic);

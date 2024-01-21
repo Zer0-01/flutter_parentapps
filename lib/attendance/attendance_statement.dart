@@ -150,7 +150,6 @@ class _AttendanceStatementState extends State<AttendanceStatement> {
             ? DateFormat('dd MMM y').format(timestampDate.toDate())
             : 'N/A/';
         String? fileName = attendanceData['fileName'] ?? 'N/A';
-        String? fileURL = attendanceData['fileURl'] ?? 'N/A';
         String? statement = attendanceData['statement'] ?? 'N/A';
         String? time = attendanceData['time'] ?? 'N/A';
         String? formattedTime;
@@ -235,6 +234,5 @@ class _AttendanceStatementState extends State<AttendanceStatement> {
       },
     );
 
-    throw UnimplementedError();
   }
 }

@@ -165,6 +165,8 @@ class FileList extends StatelessWidget {
 // Format the DateTime to a String
         final String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
 
+        final String formId = document.id;
+
         return Card(
           elevation: 2,
           margin: EdgeInsets.all(8),
@@ -188,6 +190,7 @@ class FileList extends StatelessWidget {
                     formType: formType,
                     title: title,
                     childrenId: childrenId,
+                    formId: formId,
                   ),
                 ),
               );

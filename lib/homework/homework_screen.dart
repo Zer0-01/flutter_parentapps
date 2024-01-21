@@ -78,12 +78,9 @@ class _GetHomeworkState extends State<GetHomework> {
                   snapshot.data!.docs[index].data() as Map<String, dynamic>;
 
               String homeworkId = snapshot.data!.docs[index].id;
-              String? className = data['class'] as String?;
               String? description = data['description'] as String?;
-              String? downloadURL = data['downloadURL'] as String?;
               Timestamp? dueDate = data['dueDate'] as Timestamp?;
               String? subject = data['subject'] as String?;
-              String? teacherId = data['teacherId'] as String?;
               String? title = data['title'] as String?;
 
               DateTime currentDate = DateTime.now();
@@ -194,50 +191,4 @@ class _GetHomeworkState extends State<GetHomework> {
       },
     );
   }
-
-//method to get 2 stream at the same time
-// @override
-// Widget build(BuildContext context) {
-//   // TODO: implement build
-//   CollectionReference homeworkCollection = FirebaseFirestore.instance
-//       .collection('HomeworkTest1')
-//       .doc(className)
-//       .collection('21-8-23');
-//
-//   CollectionReference studentCollection = FirebaseFirestore.instance
-//     .collection('ParentsTest1');
-//
-//   Stream<List<QuerySnapshot>> a = StreamZip([homeworkCollection.snapshots(), studentCollection.snapshots()]);
-//
-//
-//   return StreamBuilder<List<QuerySnapshot>>(
-//     stream: StreamZip([homeworkCollection.snapshots(), studentCollection.snapshots()]),//homeworkCollection.snapshots(),
-//     builder: (context, snapshot) {
-//       if (snapshot.hasError) {
-//         return Text("Something went wrong");
-//       }
-//
-//       if (snapshot.connectionState == ConnectionState.waiting) {
-//         return CircularProgressIndicator();
-//       }
-//
-//       if (!snapshot.hasData || snapshot.data!.elementAt(0).docs.isEmpty || snapshot.data!.elementAt(1).docs.isEmpty) {
-//         return Text("No data available: d0=${snapshot.data!.elementAt(0).docs.isEmpty}, d1=${snapshot.data!.elementAt(1).docs.isEmpty}");
-//       }
-//
-//       Map<String, dynamic> homeworkData = snapshot.data!.elementAt(0).docs[0].data() as Map<String, dynamic>;
-//       Map<String, dynamic> parent = snapshot.data!.elementAt(1).docs[0].data() as Map<String, dynamic>;
-//
-//       return Scaffold(
-//         appBar: AppBar(
-//           title: Text("Attendance"),
-//         ),
-//         body: Column(children: [
-//           Text("Homework 0: subject=${homeworkData['subject']}"),
-//           Text("Description 0: description=${parent['description']}")
-//         ]),
-//       );
-//     },
-//   );
-// }
 }

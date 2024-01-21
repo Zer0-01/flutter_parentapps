@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PdfViewerPage extends StatefulWidget {
@@ -10,12 +9,14 @@ class PdfViewerPage extends StatefulWidget {
   final String formType;
   final String title;
   final String childrenId;
+  final String formId;
 
   PdfViewerPage(
       {required this.fileUrl,
       required this.formType,
       required this.title,
-      required this.childrenId});
+      required this.childrenId,
+      required this.formId});
 
   @override
   _PdfViewerPageState createState() => _PdfViewerPageState();
@@ -43,7 +44,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
       final CollectionReference formReference = firestore
           .collection('Forms')
-          .doc(widget.title)
+          .doc(widget.formId)
           .collection('PermissionStatus');
 
       DocumentSnapshot documentSnapshot =
@@ -77,7 +78,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     try {
       final CollectionReference formReference = firestore
           .collection('Forms')
-          .doc(widget.title)
+          .doc(widget.formId)
           .collection('PermissionStatus');
 
       DocumentReference documentReference =

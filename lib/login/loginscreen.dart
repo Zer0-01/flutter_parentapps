@@ -16,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email = "", _password = "";
   final auth = FirebaseAuth.instance;
   String _errorMessage = "";
+  bool _isloading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +99,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: _isloading
+                    ? CircularProgressIndicator()
+                    : const Text(
+                        'Login',
+                        style: TextStyle(fontSize: 18),
+                      ),
                 onPressed: () async {
                   await signInWithEmailAndPassword();
                 },
@@ -130,6 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Function to handle sign in with email and password
   Future<void> signInWithEmailAndPassword() async {
+    setState(() {
+      _isloading = true;
+    });
+
     try {
       await auth.signInWithEmailAndPassword(
           email: '$_email@smk.com', password: _password);
@@ -145,6 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
       // Handle authentication error and update error message
       setState(() {
         _errorMessage = 'Invalid email or password';
+      });
+    } finally {
+      setState(() {
+        _isloading = false;
       });
     }
   }
